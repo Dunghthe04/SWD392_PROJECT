@@ -32,3 +32,24 @@ public class IssueUpdateResult
     public string Message { get; set; } = string.Empty;
     public Issue? Issue { get; set; }
 }
+
+/// <summary>
+/// Result object for order update operation
+/// </summary>
+public class UpdateOrderResult
+{
+    public bool Success { get; init; }
+    public bool IsConflict { get; init; }
+    public string Message { get; init; } = string.Empty;
+    public Order? CurrentOrder { get; init; }
+}
+
+/// <summary>
+/// Result object for order list retrieval
+/// </summary>
+public class ViewOrderResult
+{
+    public List<Order> OrderList { get; init; } = new();
+    public string? Message { get; init; }
+    public bool IsError { get; init; }
+}

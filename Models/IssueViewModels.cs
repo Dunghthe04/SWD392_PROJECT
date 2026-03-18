@@ -1,4 +1,4 @@
-namespace SWD392_PROJECT.ViewModels;
+namespace SWD392_PROJECT.Models;
 
 /// <summary>
 /// ViewModel for submitting a new issue report
