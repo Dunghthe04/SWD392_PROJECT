@@ -1,6 +1,8 @@
 using SWD392_PROJECT.Data;
 using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Data.Repositories.Implementations;
+using SWD392_PROJECT.Repositories.Interfaces;
+using SWD392_PROJECT.Repositories.Implementations;
 using SWD392_PROJECT.Services.Interfaces;
 using SWD392_PROJECT.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,8 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
@@ -40,6 +44,8 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IStaffContext, DemoStaffContext>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,204 @@
+@model SWD392_PROJECT.Models.User
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit Profile</h5>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("Update", "Profile")" novalidate>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="@Model.Username" disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <input type="text" class="form-control" id="role" value="@Model.Role" disabled>
+                            <small class="text-muted">Contact administrator to change your role</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="@(Model.Phone ?? "")" 
+                                   placeholder="e.g., +84912345678" required pattern="^[+]?[0-9\s\-\(\)]{10,}$">
+                            <small class="text-muted">Phone number must be 10-15 digits</small>
+                            <div class="invalid-feedback">
+                                Please provide a valid phone number.
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="@Url.Action("Index", "Profile")" class="btn btn-secondary w-100">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Information</h6>
+                        <p class="mb-2">
+                            <strong>Validation Rules:</strong>
+                        </p>
+                        <ul class="mb-0">
+                            <li>Email: Must be a valid email format</li>
+                            <li>Phone: Must be 10-15 digits (can include spaces, hyphens, or parentheses)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.querySelector('form');
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+
+<div class="edit-header text-center">
+    <div class="container">
+        <h1 class="edit-title mb-1">Edit Your Profile</h1>
+        <p class="edit-subtitle">Update your account information</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="error-alert alert alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="edit-card">
+                <div style="padding: 30px;">
+                    <form method="post" action="@Url.Action("Update", "Profile")" novalidate>
+                        <div class="edit-form-group">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user-tag"></i> Username
+                            </label>
+                            <input type="text" class="form-control" id="username" value="@Model.Username" disabled>
+                            <span class="form-text">Your username cannot be changed</span>
+                        </div>
+
+                        <div class="edit-form-group">
+                            <label for="role" class="form-label">
+                                <i class="fas fa-shield-alt"></i> Account Role
+                            </label>
+                            <input type="text" class="form-control" id="role" value="@Model.Role" disabled>
+                            <span class="form-text">Contact administrator if you need to change your role</span>
+                        </div>
+
+                        <div class="form-section-divider"></div>
+
+                        <div class="edit-form-group">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address <span class="required-label">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address (e.g., user@example.com)
+                            </div>
+                            <span class="form-text">We'll use this to contact you</span>
+                        </div>
+
+                        <div class="edit-form-group">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone"></i> Phone Number <span class="required-label">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="@(Model.Phone ?? "")" 
+                                   placeholder="e.g., +84912345678 or 0912-345-678" 
+                                   required 
+                                   pattern="^[+]?[0-9\s\-\(\)]{10,}$">
+                            <div class="invalid-feedback">
+                                Phone number must be 10-15 digits (can include +, -, spaces, or parentheses)
+                            </div>
+                            <span class="form-text">International format: +84912345678 or Local: 0912-345-678</span>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn btn-save">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="@Url.Action("Index", "Profile")" class="btn btn-cancel" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h6>
+                    <i class="fas fa-info-circle"></i> Validation Rules
+                </h6>
+                <ul>
+                    <li><strong>Email:</strong> Must be a valid email format (e.g., user@example.com)</li>
+                    <li><strong>Phone:</strong> Must be 10-15 digits - can include +, hyphens, spaces, or parentheses</li>
+                    <li><strong>Examples:</strong> +84912345678, 0912-345-678, (091) 234-5678</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
+    });
+</script>

@@ -81,8 +81,15 @@ public class ReportIssueService : IReportIssueService
                 };
             }
 
-            // Create issue
-            var issue = Issue.CreateIssue(orderId, details);
+            var issue = new Issue
+            {
+                OrderId = orderId,
+                Details = details,
+                Status = "Open",
+                CreatedDate = DateTime.UtcNow,
+                LastUpdatedDate = DateTime.UtcNow
+            };
+
             var createdIssue = await _issueRepository.CreateAsync(issue);
 
             if (createdIssue == null)
@@ -159,8 +166,9 @@ public class ReportIssueService : IReportIssueService
 
         try
         {
-            // Update issue with image
-            issue.UpdateIssue(newImagePath: imagePath);
+            issue.ImagePath = imagePath;
+            issue.LastUpdatedDate = DateTime.UtcNow;
+            await _issueRepository.UpdateAsync(issue);
             await _issueRepository.UpdateAsync(issue);
 
             return new ImageUploadResult
@@ -225,7 +233,8 @@ public class ReportIssueService : IReportIssueService
 
         try
         {
-            issue.UpdateIssue(newStatus);
+            issue.Status = newStatus;
+            issue.LastUpdatedDate = DateTime.UtcNow;
             await _issueRepository.UpdateAsync(issue);
 
             return new IssueUpdateResult
