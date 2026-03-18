@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,4 +22,13 @@ namespace SWD392_PROJECT.Models
         // Ensure non-null default to satisfy nullable reference checks
         public string Status { get; set; } = "Pending";
     }
+=======
+namespace SWD392_PROJECT.Models;
+public class Payment
+{
+    public int PaymentId { get; set; }
+    public int OrderId { get; set; }
+    public decimal Amount { get; set; }
+    public string Status { get; set; } = "Pending";
+>>>>>>> 8de0a11 ( Dung commit)
 }

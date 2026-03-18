@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWD392_PROJECT.Data;
 
@@ -11,9 +12,11 @@ using SWD392_PROJECT.Data;
 namespace SWD392_PROJECT.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260318133220_AddProductEntities")]
+    partial class AddProductEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,30 +212,15 @@ namespace SWD392_PROJECT.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-<<<<<<< HEAD
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
-=======
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
->>>>>>> 8de0a11 ( Dung commit)
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-<<<<<<< HEAD
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("PaymentId");
-
-                    b.ToTable("Payments");
-                });
-
-=======
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -273,7 +261,6 @@ namespace SWD392_PROJECT.Migrations
                     b.ToTable("Products");
                 });
 
->>>>>>> 8de0a11 ( Dung commit)
             modelBuilder.Entity("SWD392_PROJECT.Models.Promotion", b =>
                 {
                     b.Property<int>("PromotionId")
@@ -326,24 +313,6 @@ namespace SWD392_PROJECT.Migrations
                     b.ToTable("Promotions");
                 });
 
-<<<<<<< HEAD
-            modelBuilder.Entity("SWD392_PROJECT.Models.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
-
-                    b.Property<string>("AvatarPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-=======
             modelBuilder.Entity("SWD392_PROJECT.Models.Stall", b =>
                 {
                     b.Property<int>("StallId")
@@ -353,52 +322,10 @@ namespace SWD392_PROJECT.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StallId"));
 
                     b.Property<string>("Name")
->>>>>>> 8de0a11 ( Dung commit)
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-<<<<<<< HEAD
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("Student");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("IX_User_Email");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasDatabaseName("IX_User_Username");
-
-                    b.ToTable("Users");
-=======
                     b.HasKey("StallId");
 
                     b.ToTable("Stalls");
@@ -428,7 +355,6 @@ namespace SWD392_PROJECT.Migrations
                     b.HasIndex("StallId");
 
                     b.ToTable("StallProducts");
->>>>>>> 8de0a11 ( Dung commit)
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>

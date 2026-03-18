@@ -1,0 +1,140 @@
+@model SWD392_PROJECT.Models.CreateProductViewModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <!-- Đặt col-lg-8 để form nằm gọn gàng ở giữa màn hình -->
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Thẻ Card bọc ngoài form với background màu xanh biển đậm (Deep Blue) thay vì đen -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #f8f9fa;">
+                
+                <!-- Phần Header của Form -->
+                <div class="card-header border-0 bg-transparent text-center pt-5 pb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-info text-white rounded-circle shadow-lg mb-3" style="width: 70px; height: 70px;">
+                        <!-- Đã kích hoạt Bootstrap Icons trong Layout -->
+                        <i class="bi bi-box-seam" style="font-size: 2.2rem;"></i>
+                    </div>
+                    <h2 class="fw-bold mb-0 text-white">Create New Product</h2>
+                    <p class="text-light opacity-75 mt-2">Cung cấp thông tin để thêm sản phẩm mới vào hệ thống</p>
+                </div>
+
+                <div class="card-body px-4 px-md-5 pb-5 pt-0">
+                    
+                    <!-- Thông báo lỗi/thành công -->
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert @(Model.IsSuccess ? "alert-success bg-success text-white border-0" : "alert-warning bg-warning text-dark border-0") shadow-sm rounded-3 d-flex align-items-center" role="alert">
+                            <i class="bi @(Model.IsSuccess ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") fs-4 me-3"></i>
+                            <div>@Model.StatusMessage</div>
+                        </div>
+                    }
+
+                    <form asp-controller="Product" asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-warning mb-3"></div>
+
+                        <!-- Hàng 1: Name & Category -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <label asp-for="Name" class="form-label fw-semibold text-light">Product Name <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-tag-fill"></i></span>
+                                    <input asp-for="Name" class="form-control border-0 bg-light text-dark fw-medium" placeholder="e.g. Spicy Noodle" />
+                                </div>
+                                <span asp-validation-for="Name" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label fw-semibold text-light">Category <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-grid-fill"></i></span>
+                                    <input asp-for="Category" class="form-control border-0 bg-light text-dark fw-medium" placeholder="e.g. Drink, Food, Fast Food" />
+                                </div>
+                                <span asp-validation-for="Category" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 2: Price & Quantity -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <label asp-for="Price" class="form-label fw-semibold text-light">Price ($) <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-currency-dollar"></i></span>
+                                    <input asp-for="Price" type="number" step="0.01" class="form-control border-0 bg-light text-dark fw-medium" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Quantity" class="form-label fw-semibold text-light">Initial Stock <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-boxes"></i></span>
+                                    <input asp-for="Quantity" type="number" class="form-control border-0 bg-light text-dark fw-medium" placeholder="10" />
+                                </div>
+                                <span asp-validation-for="Quantity" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 3: SellingTime & StallId -->
+                        <div class="row mb-5">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <label asp-for="SellingTime" class="form-label fw-semibold text-light">Selling Time <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-clock-fill"></i></span>
+                                    <input asp-for="SellingTime" class="form-control border-0 bg-light text-dark fw-medium" placeholder="e.g. 7:00 AM - 5:00 PM" />
+                                </div>
+                                <span asp-validation-for="SellingTime" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="StallId" class="form-label fw-semibold text-light">Assign to Stall <span class="text-info">*</span></label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark border-0 text-info"><i class="bi bi-shop-window"></i></span>
+                                    <select asp-for="StallId" class="form-select border-0 bg-light text-dark fw-medium">
+                                        <option value="">-- Select Stall --</option>
+                                        @foreach (var stall in Model.AvailableStalls)
+                                        {
+                                            <option value="@stall.StallId">@stall.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <span asp-validation-for="StallId" class="text-warning small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <!-- Các nút bấm điều hướng -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 border-top border-secondary pt-4">
+                            <a asp-action="Index" class="btn btn-outline-light btn-lg px-4 rounded-pill fw-bold hover-white opacity-75">
+                                <i class="bi bi-arrow-left me-2"></i> Trở về
+                            </a>
+                            <button type="submit" class="btn btn-info btn-lg px-5 rounded-pill shadow-lg fw-bold text-dark" style="background: linear-gradient(45deg, #0dcaf0, #0dfdca); border: none;">
+                                Create Product <i class="bi bi-check2-circle ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Thêm chút hiệu ứng sáng bóng khi hover nút Trở về */
+    .hover-white:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white !important;
+        opacity: 1 !important;
+    }
+    
+    /* Hiệu ứng Focus Input đẹp mắt */
+    .form-control:focus, .form-select:focus {
+        border-color: #0dcaf0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.4) !important;
+        background-color: #ffffff !important;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 namespace SWD392_PROJECT.Models;
 
 /// <summary>
@@ -54,4 +55,42 @@ public class Product
     /// Last update timestamp
     /// </summary>
     public DateTime? UpdatedAt { get; set; }
+=======
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SWD392_PROJECT.Models;
+
+// CLASS 2: Product («data abstraction class»)
+public class Product
+{
+    public int ProductId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public string SellingTime { get; set; } = string.Empty;
+
+    [NotMapped] // Khai báo này giúp thuộc tính có trên Class nhưng k bị lỗi khi quét EF DB
+    public string AvailabilityStatus { get; set; } = "OutOfStock";
+
+    // UML Method: +setProductInfo(productData)
+    public void SetProductInfo(CreateProductViewModel productData)
+    {
+        Name = productData.Name;
+        Price = productData.Price;
+        Category = productData.Category;
+        SellingTime = productData.SellingTime;
+
+        if (productData.Quantity > 0)
+            AvailabilityStatus = "Available";
+        else
+            AvailabilityStatus = "OutOfStock";
+    }
+
+    // UML Method: +createProduct()
+    public void CreateProduct()
+    {
+        // Hàm đại diện theo yêu cầu UML Pseudocode. 
+        // Về bản chất EF Core sẽ lưu bằng lệnh Add() ở DBContext.
+    }
+>>>>>>> 8de0a11 ( Dung commit)
 }

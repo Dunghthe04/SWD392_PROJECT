@@ -1,0 +1,64 @@
+@model IEnumerable<SWD392_PROJECT.Models.Product>
+@{
+    ViewData["Title"] = "Product List";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Inventory Products</h2>
+        <a asp-controller="Product" asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle"></i> Add New Product
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Selling Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@item.ProductId</td>
+                                    <td>@item.Name</td>
+                                    <td><span class="badge bg-secondary">@item.Category</span></td>
+                                    <td>$@item.Price.ToString("0.00")</td>
+                                    <td>@item.SellingTime</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-box-seam display-4 mb-3 d-block"></i>
+                                    <h5>No products found in the inventory</h5>
+                                    <p>Click "Add New Product" to create your first product.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

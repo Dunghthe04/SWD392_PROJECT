@@ -22,7 +22,14 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Promotion> Promotions { get; set; }
+<<<<<<< HEAD
     public DbSet<Payment> Payments { get; set; }
+=======
+    public DbSet<Stall> Stalls { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<StallProduct> StallProducts { get; set; }
+>>>>>>> 8de0a11 ( Dung commit)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,8 +84,63 @@ public class AppDbContext : DbContext
                 .WithOne(i => i.Order)
                 .HasForeignKey(i => i.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
+<<<<<<< HEAD
 
             entity.HasIndex(o => o.Status).HasDatabaseName("IX_Order_Status");
+=======
+                
+            // Relationship: Order belongs to a Stall (optional)
+            entity.HasOne<Stall>()
+                .WithMany()
+                .HasForeignKey(o => o.StallId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Configure Stall entity
+        modelBuilder.Entity<Stall>(entity =>
+        {
+            entity.HasKey(s => s.StallId);
+            entity.Property(s => s.Name).HasMaxLength(255).IsRequired();
+        });
+
+        // Configure Payment entity
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(p => p.PaymentId);
+            entity.Property(p => p.OrderId).IsRequired();
+            entity.Property(p => p.Amount).HasPrecision(18, 2);
+            entity.Property(p => p.Status).HasMaxLength(50);
+            
+            // Relationship: Payment belongs to Order
+            entity.HasOne<Order>()
+                .WithMany()
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure Product entity
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(p => p.ProductId);
+            entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
+            entity.Property(p => p.Price).HasPrecision(18, 2);
+        });
+
+        // Configure StallProduct entity
+        modelBuilder.Entity<StallProduct>(entity =>
+        {
+            entity.HasKey(sp => sp.StallProductId);
+            
+            entity.HasOne(sp => sp.Product)
+                .WithMany()
+                .HasForeignKey(sp => sp.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(sp => sp.Stall)
+                .WithMany()
+                .HasForeignKey(sp => sp.StallId)
+                .OnDelete(DeleteBehavior.Cascade);
+>>>>>>> 8de0a11 ( Dung commit)
         });
 
         // Configure OrderItem entity
