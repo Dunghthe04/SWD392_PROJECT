@@ -133,7 +133,7 @@ public class OrderController : Controller
             MenuItemId = item.MenuItemId,
             ItemName = item.ItemName,
             Quantity = item.Quantity,
-            UnitPrice = item.UnitPrice
+            UnitPrice = Double.Parse(item.UnitPrice.ToString())
         }).ToList();
 
         // Validate
