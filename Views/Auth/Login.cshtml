@@ -159,6 +159,65 @@
             color: #999;
             font-size: 0.85rem;
         }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0061ff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 97, 255, 0.15);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: #0061ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -166,8 +225,15 @@
         <div class="login-header">
             <h1>🍽️</h1>
             <h1>Campus Food</h1>
-            <p>Select your role to continue</p>
+            <p>Login to your account</p>
         </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="success-message">
+                @TempData["SuccessMessage"]
+            </div>
+        }
 
         @if (!ViewData.ModelState.IsValid)
         {
@@ -186,46 +252,22 @@
         <form method="post" asp-action="Login">
             @Html.AntiForgeryToken()
 
-            <div class="role-selection">
-                <!-- Student -->
-                <div class="role-button student">
-                    <input type="radio" id="student" name="role" value="Student" />
-                    <label for="student">
-                        <span class="role-icon">👨‍🎓</span>
-                        <span>Student</span>
-                    </label>
-                </div>
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username" />
+            </div>
 
-                <!-- Canteen Staff -->
-                <div class="role-button staff">
-                    <input type="radio" id="staff" name="role" value="CanteenStaff" />
-                    <label for="staff">
-                        <span class="role-icon">👨‍💼</span>
-                        <span>Canteen Staff</span>
-                    </label>
-                </div>
-
-                <!-- Manager -->
-                <div class="role-button manager">
-                    <input type="radio" id="manager" name="role" value="Manager" />
-                    <label for="manager">
-                        <span class="role-icon">👨‍💼</span>
-                        <span>Manager</span>
-                    </label>
-                </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password" />
             </div>
 
             <button type="submit" class="submit-button">Login</button>
         </form>
 
-        <div class="divider">Demo Credentials</div>
-        <div class="footer-text">
-            <p>This is a demo application. Select any role above to access the system.</p>
-            <p style="margin-top: 1rem;">
-                <strong>Student:</strong> View and report issues on orders<br>
-                <strong>Canteen Staff:</strong> Manage orders<br>
-                <strong>Manager:</strong> View notifications and issue management
-            </p>
+        <div class="divider">New User?</div>
+        <div class="signup-link">
+            Don't have an account? <a href="~/Auth/Register">Create one here</a>
         </div>
     </div>
 

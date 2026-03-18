@@ -1,0 +1,218 @@
+@model SWD392_PROJECT.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">User Profile</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                            {
+                                <img src="@Model.AvatarPath" alt="Avatar" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; margin: 0 auto;">
+                                    <i class="fas fa-user" style="font-size: 60px; color: #ccc;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th>Username:</th>
+                                        <td>@Model.Username</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Role:</th>
+                                        <td>
+                                            <span class="badge bg-info">@Model.Role</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email:</th>
+                                        <td>@Model.Email</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Phone:</th>
+                                        <td>@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Status:</th>
+                                        <td>
+                                            @if (Model.IsActive)
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Inactive</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Member Since:</th>
+                                        <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                    @if (Model.UpdatedAt.HasValue)
+                                    {
+                                        <tr>
+                                            <th>Last Updated:</th>
+                                            <td>@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="@Url.Action("Edit", "Profile")" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-header text-center">
+    <div class="container">
+        <div class="profile-avatar">
+            @if (!string.IsNullOrEmpty(Model.AvatarPath))
+            {
+                <img src="@Model.AvatarPath" alt="@Model.Username" class="rounded-circle">
+            }
+            else
+            {
+                <div class="profile-avatar-placeholder rounded-circle">
+                    <i class="fas fa-user" style="font-size: 80px; color: rgba(255, 255, 255, 0.7);"></i>
+                </div>
+            }
+        </div>
+        <h1 class="profile-title mb-1">@Model.Username</h1>
+        <p class="profile-subtitle">@Model.Role Account</p>
+    </div>
+</div>
+
+<div class="container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert success-alert alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert error-alert alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="profile-info-card">
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-user-tag"></i> Username</div>
+                    <div class="info-value">@Model.Username</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-shield-alt"></i> Role</div>
+                    <div class="info-value">
+                        <span class="badge badge-role">@Model.Role</span>
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-envelope"></i> Email Address</div>
+                    <div class="info-value">@Model.Email</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-phone"></i> Phone Number</div>
+                    <div class="info-value">
+                        @if (string.IsNullOrEmpty(Model.Phone))
+                        {
+                            <span class="text-muted">Not provided</span>
+                        }
+                        else
+                        {
+                            <span>@Model.Phone</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-toggle-on"></i> Account Status</div>
+                    <div class="info-value">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-status bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-status bg-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label"><i class="fas fa-calendar-alt"></i> Member Since</div>
+                    <div class="info-value">@Model.CreatedAt.ToString("dd/MM/yyyy 'at' HH:mm")</div>
+                </div>
+
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <div class="info-group">
+                        <div class="info-label"><i class="fas fa-sync"></i> Last Updated</div>
+                        <div class="info-value">@Model.UpdatedAt.Value.ToString("dd/MM/yyyy 'at' HH:mm")</div>
+                    </div>
+                }
+            </div>
+
+            <div class="action-buttons">
+                <a href="@Url.Action("Edit", "Profile")" class="btn btn-edit-profile">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-back-home">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

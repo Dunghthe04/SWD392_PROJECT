@@ -7,21 +7,57 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SWD392_PROJECT.styles.css" asp-append-version="true" />
+    <style>
+        .dropdown-menu {
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            padding: 6px;
+            min-width: 150px;
+        }
+
+        .dropdown-item {
+            border-radius: 6px;
+            font-size: 13.5px;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .dropdown-item svg {
+                flex-shrink: 0;
+            }
+
+        .dropdown-divider {
+            margin: 4px 6px;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: #fff1f1;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
             <div class="container-fluid navbar-container">
-                <!-- Brand -->
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     🍽️ Campus Food
                 </a>
 
-                <!-- Nav Items (Center) -->
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <div class="navbar-nav-center">
                         <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                         <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="Index">Payment</a>
                         <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Index">Orders</a>
                         <a class="nav-link" asp-area="" asp-controller="Promotion" asp-action="GetAllPromotions">Promotions</a>
                         @if (User.IsInRole("Manager"))
@@ -32,25 +68,21 @@
                     </div>
                 }
 
-                <!-- Right Actions -->
                 <div class="navbar-actions">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <!-- Notification Bell (Manager Only) -->
                         @if (User.IsInRole("Manager"))
                         {
                             <div class="notification-container">
                                 <button class="btn btn-notification" id="notificationBtn" title="Notifications" type="button">
                                     <svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                     </svg>
                                     <span class="badge badge-notification" id="notificationBadge" style="display: none;">
                                         <span id="notificationCount">0</span>
                                     </span>
                                 </button>
-
-                                <!-- Notification Panel (YouTube Style) -->
                                 <div class="notification-panel" id="notificationPanel" style="display: none;">
                                     <div class="notification-header">
                                         <h3>Notifications</h3>
@@ -68,20 +100,49 @@
                             </div>
                         }
 
-                        <!-- User Menu -->
                         <div class="dropdown">
-                            <button class="btn btn-user dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="12" cy="7" r="4"/>
+                            <button class="btn btn-user dropdown-toggle" type="button" id="userMenu"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
                                 </svg>
-                                <span id="userRole">@(User.FindFirst("Role")?.Value ?? "User")</span>
+                                <span>@(User.FindFirst("Role")?.Value ?? "User")</span>
                             </button>
+
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                             fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                        My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Edit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                             fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                        </svg>
+                                        Edit Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" asp-controller="Auth" asp-action="Logout">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="dropdown-item">
+                                        <button type="submit" class="dropdown-item text-danger logout-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                                 fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                                <polyline points="16 17 21 12 16 7" />
+                                                <line x1="21" y1="12" x2="9" y2="12" />
+                                            </svg>
                                             Logout
                                         </button>
                                     </form>
@@ -97,6 +158,7 @@
             </div>
         </nav>
     </header>
+
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
@@ -104,12 +166,10 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
-    <!-- Notification Panel Script -->
+
     @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Manager"))
     {
         <script>
-            // DOM Elements
             const notificationBtn = document.getElementById('notificationBtn');
             const notificationPanel = document.getElementById('notificationPanel');
             const notificationList = document.getElementById('notificationList');
@@ -117,10 +177,9 @@
             const notificationBadge = document.getElementById('notificationBadge');
             const notificationCount = document.getElementById('notificationCount');
 
-            // Update notification count
             function updateNotificationCount() {
                 fetch('/Issue/GetUnreadCount')
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
                         if (data.success) {
                             if (data.count > 0) {
@@ -131,81 +190,58 @@
                             }
                         }
                     })
-                    .catch(error => console.error('Error updating notification count:', error));
+                    .catch(e => console.error(e));
             }
 
-            // Load notifications into panel
             async function loadNotifications() {
                 try {
                     notificationList.innerHTML = '<div class="notification-loading">Loading notifications...</div>';
-                    const response = await fetch('/Issue/GetUnreadNotifications');
-                    const data = await response.json();
-
+                    const data = await fetch('/Issue/GetUnreadNotifications').then(r => r.json());
                     if (data.success && data.notifications.length > 0) {
-                        notificationList.innerHTML = data.notifications.map(notification => `
-                            <div class="notification-item unread" onclick="viewIssue(${notification.issueId})">
+                        notificationList.innerHTML = data.notifications.map(n => `
+                            <div class="notification-item unread" onclick="viewIssue(${n.issueId})">
                                 <div class="notification-dot"></div>
                                 <div class="notification-content">
-                                    <p class="notification-message">${escapeHtml(notification.message)}</p>
-                                    <p class="notification-time">${notification.createdDate}</p>
+                                    <p class="notification-message">${escapeHtml(n.message)}</p>
+                                    <p class="notification-time">${n.createdDate}</p>
                                 </div>
                             </div>
                         `).join('');
                     } else {
                         notificationList.innerHTML = '<div class="notification-empty">No new notifications</div>';
                     }
-                } catch (error) {
-                    console.error('Error loading notifications:', error);
+                } catch (e) {
                     notificationList.innerHTML = '<div class="notification-empty">Error loading notifications</div>';
                 }
             }
 
-            // Escape HTML to prevent XSS
             function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
+                const d = document.createElement('div');
+                d.textContent = text;
+                return d.innerHTML;
             }
 
-            // View issue
-            function viewIssue(issueId) {
-                window.location.href = `/Issue/Details/${issueId}`;
-            }
+            function viewIssue(id) { window.location.href = `/Issue/Details/${id}`; }
 
-            // Toggle notification panel
             notificationBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
-                if (notificationPanel.style.display === 'none' || !notificationPanel.style.display) {
-                    await loadNotifications();
-                    notificationPanel.style.display = 'block';
-                } else {
-                    notificationPanel.style.display = 'none';
-                }
+                const hidden = notificationPanel.style.display === 'none' || !notificationPanel.style.display;
+                if (hidden) { await loadNotifications(); notificationPanel.style.display = 'block'; }
+                else notificationPanel.style.display = 'none';
             });
 
-            // Close panel button
-            closePanelBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                notificationPanel.style.display = 'none';
-            });
+            closePanelBtn.addEventListener('click', e => { e.stopPropagation(); notificationPanel.style.display = 'none'; });
 
-            // Close panel when clicking outside
             document.addEventListener('click', function(e) {
-                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target))
                     notificationPanel.style.display = 'none';
-                }
             });
 
-            // Update on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                updateNotificationCount();
-            });
-
-            // Update notification count every 30 seconds
+            document.addEventListener('DOMContentLoaded', updateNotificationCount);
             setInterval(updateNotificationCount, 30000);
         </script>
     }
-    
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

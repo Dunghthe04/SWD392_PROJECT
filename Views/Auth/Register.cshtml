@@ -1,0 +1,265 @@
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Campus Food</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #0061ff 0%, #0052d4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            padding: 1rem;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .register-header h1 {
+            font-size: 2.5rem;
+            color: #0061ff;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #0061ff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 97, 255, 0.15);
+        }
+
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .role-option {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .role-option input[type="radio"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        .role-option:hover {
+            border-color: #0061ff;
+            background-color: #f5f9ff;
+        }
+
+        .role-option input[type="radio"]:checked + label {
+            font-weight: 700;
+            color: #0061ff;
+        }
+
+        .role-option label {
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #0061ff 0%, #0052d4 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 97, 255, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .footer-text a {
+            color: #0061ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        @@media (max-width: 576px) {
+            .register-container {
+                padding: 1.5rem;
+            }
+
+            .register-header h1 {
+                font-size: 2rem;
+            }
+
+            .role-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .role-option {
+                padding: 1rem;
+            }
+
+            .role-option label {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>🍽️</h1>
+            <h1>Campus Food</h1>
+            <p>Create your account</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                @foreach (var error in modelState.Errors)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @error.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+            }
+        }
+
+        <form method="post" asp-action="Register">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required minlength="3" placeholder="Enter username" />
+                <div class="form-text">At least 3 characters</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required minlength="6" placeholder="Enter password" />
+                <div class="form-text">At least 6 characters</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required minlength="6" placeholder="Confirm password" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone (Optional)</label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select Role</label>
+                <div class="role-selection">
+                    <div class="role-option">
+                        <input type="radio" id="student" name="role" value="Student" required />
+                        <label for="student">Student</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="staff" name="role" value="CanteenStaff" />
+                        <label for="staff">Canteen Staff</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="manager" name="role" value="Manager" />
+                        <label for="manager">Manager</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-button">Create Account</button>
+        </form>
+
+        <div class="footer-text">
+            Already have an account? <a href="~/Auth/Login">Login here</a>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
