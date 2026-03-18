@@ -3,9 +3,10 @@
 
 @{
     ViewData["Title"] = "Browse Menu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-md-8">
@@ -13,6 +14,13 @@
                 <i class="fas fa-utensils"></i> Browse Menu
             </h1>
             <p class="text-muted">Explore our delicious food options</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Checkout", "Order")" class="btn btn-lg btn-warning" id="checkoutBtn">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartCount" class="badge bg-danger">0</span>
+                Checkout
+            </a>
         </div>
     </div>
 
@@ -32,8 +40,8 @@
                 <div class="card-body">
                     <form method="get" class="row g-3">
                         <div class="col-md-6">
-                            <input type="text" name="search" class="form-control" 
-                                   placeholder="Search products..." 
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Search products..."
                                    value="@ViewBag.SearchTerm">
                         </div>
                         <div class="col-md-4">
@@ -43,7 +51,7 @@
                                 {
                                     @foreach (var cat in (IEnumerable<string>)ViewBag.Categories)
                                     {
-                                        <option value="@cat" 
+                                        <option value="@cat"
                                                 selected="@(ViewBag.SelectedCategory == cat ? "selected" : "")">
                                             @cat
                                         </option>
@@ -78,59 +86,48 @@
             @foreach (var product in Model)
             {
                 <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm hover-shadow">
+                    <div class="card h-100 product-card">
                         <!-- Product Image -->
-                        <div class="product-image-container" style="height: 250px; overflow: hidden; background-color: #f5f5f5;">
+                        <div class="product-img-wrap">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
-                                <img src="@product.ImageUrl" alt="@product.Name" 
-                                     class="card-img-top" style="height: 100%; object-fit: cover; width: 100%;" 
+                                <img src="@product.ImageUrl" alt="@product.Name"
                                      onerror="this.style.display='none'">
                             }
-                            <div class="d-flex align-items-center justify-content-center h-100" style="background-color: #e9ecef;">
-                                <i class="fas fa-image" style="font-size: 3rem; color: #ccc;"></i>
-                            </div>
+                            else
+                            {
+                                <i class="fas fa-image product-img-placeholder"></i>
+                            }
                         </div>
 
                         <div class="card-body">
-                            <!-- Category Badge -->
                             <span class="badge bg-info mb-2">@product.Category</span>
-
-                            <!-- Product Name -->
                             <h5 class="card-title">@product.Name</h5>
 
-                            <!-- Description -->
                             @if (!string.IsNullOrEmpty(product.Description))
                             {
                                 <p class="card-text text-muted small">
-                                    @(product.Description.Length > 100 
-                                        ? product.Description.Substring(0, 100) + "..." 
-                                        : product.Description)
+                                    @(product.Description.Length > 100
+                                                            ? product.Description.Substring(0, 100) + "..."
+                                                            : product.Description)
                                 </p>
                             }
 
-                            <!-- Selling Time -->
-                            <p class="small text-secondary">
+                            <p class="small text-secondary mb-0">
                                 <i class="fas fa-clock"></i> @product.SellingTime
                             </p>
                         </div>
 
                         <div class="card-footer bg-transparent">
                             <div class="d-flex justify-content-between align-items-center">
-                                <!-- Price -->
-                                <div>
-                                    <span class="h5 text-success mb-0">
-                                        ₫@product.Price.ToString("N0")
-                                    </span>
-                                </div>
-
-                                <!-- Actions -->
-                                <div>
-                                    <a href="@Url.Action("Details", "Menu", new { id = product.ProductId })" 
+                                <span class="h5 text-success mb-0">₫@product.Price.ToString("N0")</span>
+                                <div class="d-flex gap-1">
+                                    <a href="@Url.Action("Details", "Menu", new { id = product.ProductId })"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
-                                    <button class="btn btn-sm btn-success" onclick="addToCart(@product.ProductId, '@product.Name', @product.Price)">
+                                    <button class="btn btn-sm btn-success"
+                                            onclick="addToCart(@product.ProductId, '@product.Name', @product.Price)">
                                         <i class="fas fa-shopping-cart"></i> Add
                                     </button>
                                 </div>
@@ -156,27 +153,85 @@
 </div>
 
 <style>
-.hover-shadow {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
+    .product-card {
+        border: 1px solid #dee2e6;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
 
-.hover-shadow:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    transform: translateY(-2px);
-}
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+            transform: translateY(-2px);
+        }
 
-.product-image-container {
-    position: relative;
-}
+    .product-img-wrap {
+        height: 220px;
+        overflow: hidden;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.card {
-    border: 1px solid #dee2e6;
-}
+        .product-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .product-img-placeholder {
+        font-size: 2.5rem;
+        color: #ccc;
+    }
 </style>
 
 <script>
-function addToCart(productId, productName, price) {
-    alert(`Added "${productName}" to cart!\nPrice: ₫${price.toLocaleString('en-US')}`);
-    console.log(`Product ${productId} added to cart`);
-}
+    $(document).ready(function () {
+        updateCartCount();
+    });
+
+    function addToCart(productId, productName, price) {
+        console.log('Adding to cart:', { productId, productName, price });
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        console.log('Current cart:', cart);
+
+        const existingItem = cart.find(item => item.productId === productId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+            showNotification(`Added another "${productName}" to cart! Total: ${existingItem.quantity} items`);
+        } else {
+            cart.push({ productId: productId, quantity: 1 });
+            showNotification(`"${productName}" added to cart!`);
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        console.log('Cart saved to localStorage:', JSON.parse(localStorage.getItem('cart')));
+        updateCartCount();
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountBadge = document.getElementById('cartCount');
+        if (cartCountBadge) {
+            cartCountBadge.textContent = totalItems;
+            cartCountBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+        }
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) {
+            checkoutBtn.classList.toggle('disabled', totalItems === 0);
+        }
+    }
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top:20px; right:20px; z-index:9999; min-width:300px;';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
 </script>

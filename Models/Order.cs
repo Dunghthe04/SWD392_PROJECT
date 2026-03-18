@@ -41,10 +41,15 @@ public class Order
             Version = 1,
             CreatedAt = now,
             LastUpdatedAt = now,
-            Items = targetItems.Select(item => item.Clone()).ToList()
+            Items = new List<OrderItem>(targetItems) // Use items directly without cloning
         };
 
-        order.RecalculateTotal();
+        // Only calculate total if items are provided
+        if (targetItems.Count > 0)
+        {
+            order.RecalculateTotal();
+        }
+
         return order;
     }
 
@@ -93,7 +98,7 @@ public class Order
         };
     }
 
-    private void RecalculateTotal()
+    public void RecalculateTotal()
     {
         TotalPrice = (decimal)Items.Sum(item => item.LineTotal);
     }

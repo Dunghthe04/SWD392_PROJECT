@@ -2,6 +2,8 @@ namespace SWD392_PROJECT.Models;
 
 public class OrderItem
 {
+    public int OrderItemId { get; set; }
+
     public int OrderId { get; set; }
 
     public int MenuItemId { get; set; }
@@ -18,6 +20,7 @@ public class OrderItem
     {
         return new OrderItem
         {
+            
             OrderId = OrderId,
             MenuItemId = MenuItemId,
             ItemName = ItemName,

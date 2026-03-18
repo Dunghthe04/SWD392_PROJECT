@@ -1,4 +1,4 @@
-namespace SWD392_PROJECT.Models;
+ namespace SWD392_PROJECT.Models;
 
 /// <summary>
 /// Represents a food product/menu item in the Campus Food system
@@ -16,7 +16,7 @@ public class Product
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Product price (changed from decimal to float)
+    /// Product price
     /// </summary>
     public double Price { get; set; }
 
@@ -35,23 +35,55 @@ public class Product
     /// </summary>
     public string? ImageUrl { get; set; }
 
-    /// <summary>
-    /// Product description
-    /// </summary>
+    
     public string? Description { get; set; }
 
-    /// <summary>
-    /// Is product available
-    /// </summary>
+ 
+    public int StockQuantity { get; set; } = 100;
+
+   
     public bool IsAvailable { get; set; } = true;
 
-    /// <summary>
-    /// Product creation timestamp
-    /// </summary>
+  
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    /// <summary>
-    /// Last update timestamp
-    /// </summary>
+   
     public DateTime? UpdatedAt { get; set; }
+
+  
+    public string ReadProduct()
+    {
+        return $"{Name} - ?{Price:N0} (Stock: {StockQuantity})";
+    }
+
+ 
+    public bool CheckStock(int requestedQuantity)
+    {
+        return StockQuantity >= requestedQuantity && IsAvailable;
+    }
+
+   
+    public bool DecrementStock(int quantity)
+    {
+        if (CheckStock(quantity))
+        {
+            StockQuantity -= quantity;
+            UpdatedAt = DateTime.UtcNow;
+            return true;
+        }
+        return false;
+    }
+
+
+    public void IncrementStock(int quantity)
+    {
+        StockQuantity += quantity;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+
+    public string GetProductInfo()
+    {
+        return $"{Name} - ?{Price:N0}";
+    }
 }

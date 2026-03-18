@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SWD392_PROJECT.Models;
 using SWD392_PROJECT.Services.Interfaces;
+using SWD392_PROJECT.Repositories.Interfaces;
+using SWD392_PROJECT.Data.Repositories.Interfaces;
 
 namespace SWD392_PROJECT.Controllers;
 
@@ -10,26 +12,38 @@ namespace SWD392_PROJECT.Controllers;
 public class OrderController : Controller
 {
     private readonly IOrderService _orderService;
+    private readonly IProductService _productService;
+    private readonly IProductRepository _productRepository;
+    private readonly IOrderRepository _orderRepository;
     private readonly IStaffContext _staffContext;
     private readonly IPermissionService _permissionService;
     private readonly IValidationService _validationService;
     private readonly IAuditService _auditService;
     private readonly INotificationService _notificationService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public OrderController(
         IOrderService orderService,
+        IProductService productService,
+        IProductRepository productRepository,
+        IOrderRepository orderRepository,
         IStaffContext staffContext,
         IPermissionService permissionService,
         IValidationService validationService,
         IAuditService auditService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IHttpContextAccessor httpContextAccessor)
     {
         _orderService = orderService;
+        _productService = productService;
+        _productRepository = productRepository;
+        _orderRepository = orderRepository;
         _staffContext = staffContext;
         _permissionService = permissionService;
         _validationService = validationService;
         _auditService = auditService;
         _notificationService = notificationService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpGet]
@@ -133,7 +147,7 @@ public class OrderController : Controller
             MenuItemId = item.MenuItemId,
             ItemName = item.ItemName,
             Quantity = item.Quantity,
-            UnitPrice = item.UnitPrice
+            UnitPrice = (double)item.UnitPrice
         }).ToList();
 
         // Validate
@@ -178,5 +192,233 @@ public class OrderController : Controller
 
         TempData["OrderMessage"] = "Order updated successfully.";
         return RedirectToAction(nameof(Index));
+    }
+
+    // ============================================
+    // PLACE ORDER - New Feature
+    // ============================================
+
+    /// <summary>
+    /// M10: Display checkout page - Get order details before confirmation
+    /// </summary>
+    [HttpGet]
+    [Route("Checkout")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> Checkout()
+    {
+        try
+        {
+            var model = new PlaceOrderViewModel();
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error: {ex.Message}";
+            return RedirectToAction("Browse", "Menu");
+        }
+    }
+
+    /// <summary>
+    /// M11-M12: Get order summary (check stock availability)
+    /// </summary>
+    [HttpPost]
+    [Route("GetOrderSummary")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> GetOrderSummary([FromBody] List<CartItemRequest> cartItems)
+    {
+        try
+        {
+            if (cartItems == null || cartItems.Count == 0)
+            {
+                return Json(new { success = false, message = "Cart is empty" });
+            }
+
+            var orderItems = new List<OrderItem>();
+            double totalPrice = 0;
+            var errors = new List<string>();
+
+            // M11-M12: Check stock for each item
+            foreach (var item in cartItems)
+            {
+                var product = await _productRepository.GetProductByIdAsync(item.ProductId);
+                if (product == null)
+                {
+                    errors.Add($"Product {item.ProductId} not found");
+                    continue;
+                }
+
+                // Check stock availability
+                if (!product.CheckStock(item.Quantity))
+                {
+                    errors.Add($"Insufficient stock for {product.Name}. Available: {product.StockQuantity}");
+                    continue;
+                }
+
+                var orderItem = new OrderItem
+                {
+                    MenuItemId = product.ProductId,
+                    ItemName = product.Name,
+                    Quantity = item.Quantity,
+                    UnitPrice = product.Price
+                };
+
+                orderItems.Add(orderItem);
+                totalPrice += orderItem.LineTotal;
+            }
+
+            if (errors.Any())
+            {
+                return Json(new { success = false, message = string.Join("; ", errors) });
+            }
+
+            return Json(new 
+            { 
+                success = true, 
+                message = "Order summary calculated",
+                orderItems = orderItems.Select(x => new 
+                { 
+                    x.MenuItemId,
+                    x.ItemName, 
+                    x.Quantity, 
+                    x.UnitPrice, 
+                    subTotal = x.LineTotal 
+                }),
+                totalPrice = totalPrice,
+                itemCount = orderItems.Count
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = $"Error: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// M13-M17: Place order (Create order, create items, decrement stock, process payment)
+    /// </summary>
+    [HttpPost]
+    [Route("PlaceOrder")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderViewModel model)
+    {
+        try
+        {
+            // Debug logging
+            System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Model received: {model}");
+            System.Diagnostics.Debug.WriteLine($"[PlaceOrder] CartItems count: {model?.CartItems?.Count ?? -1}");
+            if (model?.CartItems != null)
+            {
+                foreach (var item in model.CartItems)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Item: ProductId={item.ProductId}, Quantity={item.Quantity}");
+                }
+            }
+
+            // Get current user
+            var userId = User.FindFirst("UserId")?.Value ?? "0";
+            var studentName = User.FindFirst("Name")?.Value ?? "Student";
+
+            if (!int.TryParse(userId, out int userIdInt))
+            {
+                return Json(new { success = false, message = "Invalid user" });
+            }
+
+            if (model?.CartItems == null || model.CartItems.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("[PlaceOrder] Cart is empty or null");
+                return Json(new { success = false, message = "Cart is empty" });
+            }
+
+            // Step 1 (M11-M12): Validate stock
+            var products = new Dictionary<int, Product>();
+            foreach (var item in model.CartItems)
+            {
+                var product = await _productRepository.GetProductByIdAsync(item.ProductId);
+                if (product == null || !product.CheckStock(item.Quantity))
+                {
+                    return Json(new { success = false, message = $"Stock validation failed for product {item.ProductId}" });
+                }
+                products[product.ProductId] = product;
+            }
+
+            // Step 2 (M13): Create empty order first to get OrderId
+            var order = Order.CreateOrder(
+                orderId: 0,
+                studentId: userIdInt,
+                studentName: studentName,
+                targetItems: new List<OrderItem>(),
+                notes: model.Notes ?? ""
+            );
+
+            System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Order created in memory (empty)");
+
+            // Step 3 (M14a): Save order first to get OrderId
+            try
+            {
+                _orderRepository.CreateOrder(order);
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Order saved successfully. OrderId={order.OrderId}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Error saving order: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Inner exception: {ex.InnerException?.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Stack trace: {ex.StackTrace}");
+                return Json(new { success = false, message = $"Failed to create order: {ex.InnerException?.Message ?? ex.Message}" });
+            }
+
+            // Step 4 (M14b): Calculate total price
+            decimal totalPrice = 0;
+            try
+            {
+                foreach (var item in model.CartItems)
+                {
+                    var product = products[item.ProductId];
+                    totalPrice += (decimal)(item.Quantity * product.Price);
+                    System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Item: {product.Name}, Qty={item.Quantity}, Price={product.Price}");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Total Price Calculated: {totalPrice}");
+
+                // Update order with total price and set to Paid status
+                order.TotalPrice = totalPrice;
+                order.Status = "Paid";
+
+                // Save order with the total price
+                _orderRepository.UpdateOrder(order, order.Version);
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Order updated with TotalPrice={totalPrice}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Error updating order total: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Inner exception: {ex.InnerException?.Message}");
+                return Json(new { success = false, message = $"Failed to update order: {ex.InnerException?.Message ?? ex.Message}" });
+            }
+
+            // Step 5 (M15): Decrement stock
+            foreach (var item in model.CartItems)
+            {
+                var product = products[item.ProductId];
+                if (!product.DecrementStock(item.Quantity))
+                {
+                    return Json(new { success = false, message = "Failed to update stock" });
+                }
+                await _productRepository.UpdateProductAsync(product);
+            }
+
+            // Success response (M18)
+            return Json(new 
+            { 
+                success = true, 
+                message = "Order placed successfully!",
+                orderId = order.OrderId,
+                totalPrice = totalPrice
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = $"Error: {ex.Message}" });
+        }
     }
 }
