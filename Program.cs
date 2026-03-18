@@ -1,4 +1,3 @@
-using SWD392_PROJECT.Coordinators;
 using SWD392_PROJECT.Data;
 using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Data.Repositories.Implementations;
@@ -40,9 +39,6 @@ builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IPromotionService, PromotionService>();
-builder.Services.AddScoped<ViewOrderCoordinator>();
-builder.Services.AddScoped<UpdateOrderCoordinator>();
-builder.Services.AddScoped<ReportIssueCoordinator>();
 builder.Services.AddScoped<IStaffContext, DemoStaffContext>();
 
 var app = builder.Build();
