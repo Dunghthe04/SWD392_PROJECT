@@ -6,14 +6,15 @@ using SWD392_PROJECT.ViewModels;
 
 namespace SWD392_PROJECT.Controllers;
 
-public class OrderManagementController : Controller
+[Route("[controller]")]
+public class OrderController : Controller
 {
     private readonly ViewOrderCoordinator _viewOrderCoordinator;
     private readonly UpdateOrderCoordinator _updateOrderCoordinator;
     private readonly IOrderService _orderService;
     private readonly IStaffContext _staffContext;
 
-    public OrderManagementController(
+    public OrderController(
         ViewOrderCoordinator viewOrderCoordinator,
         UpdateOrderCoordinator updateOrderCoordinator,
         IOrderService orderService,
@@ -26,6 +27,8 @@ public class OrderManagementController : Controller
     }
 
     [HttpGet]
+    [Route("")]
+    [Route("Index")]
     public IActionResult Index()
     {
         if (!_staffContext.IsAuthenticated || !_staffContext.HasOrderManagementPermission)
@@ -46,6 +49,7 @@ public class OrderManagementController : Controller
     }
 
     [HttpGet]
+    [Route("Edit/{id}")]
     public IActionResult Edit(int id)
     {
         if (!_staffContext.IsAuthenticated || !_staffContext.HasOrderManagementPermission)
@@ -71,6 +75,7 @@ public class OrderManagementController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Route("Edit")]
     public IActionResult Edit(EditOrderViewModel model, string submitAction)
     {
         if (!_staffContext.IsAuthenticated || !_staffContext.HasOrderManagementPermission)

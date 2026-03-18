@@ -1,0 +1,96 @@
+@model SWD392_PROJECT.ViewModels.OrderListViewModel
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">My Orders</h1>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        var alertClass = Model.IsError ? "alert-danger" : "alert-info";
+        <div class="alert @alertClass alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="alert alert-info" role="alert">
+            <p class="mb-0">No orders are available at this time.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Student Name</th>
+                        <th>Order Time</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td><strong>#@order.OrderId</strong></td>
+                        <td>@order.StudentName</td>
+                        <td>@order.OrderTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@order.TotalPrice.ToString("N0") VND</td>
+                        <td>
+                            @{
+                                var statusClass = order.Status switch
+                                {
+                                    "Pending" => "badge bg-warning text-dark",
+                                    "Completed" => "badge bg-success",
+                                    "Cancelled" => "badge bg-secondary",
+                                    "Processing" => "badge bg-info",
+                                    _ => "badge bg-secondary"
+                                };
+                            }
+                            <span class="@statusClass">@order.Status</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                @if (order.IsUpdatable())
+                                {
+                                    <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@order.OrderId" title="Edit Order">
+                                        <i class="bi bi-pencil"></i> Update
+                                    </a>
+                                }
+                                @if (order.Status == "Completed")
+                                {
+                                    <a class="btn btn-outline-danger" asp-controller="Issue" asp-action="Report" asp-route-orderId="@order.OrderId" title="Report Issue">
+                                        <i class="bi bi-exclamation-triangle"></i> Report Issue
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 97, 255, 0.05);
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

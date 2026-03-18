@@ -87,7 +87,7 @@ public class IssueController : Controller
             if (order == null)
             {
                 TempData["Error"] = "Order not found";
-                return RedirectToAction("Index", "OrderManagement");
+                return RedirectToAction("Index", "Order");
             }
 
             var viewModel = new ReportIssueViewModel
@@ -103,7 +103,7 @@ public class IssueController : Controller
         {
             _logger.LogError(ex, "Error loading report form");
             TempData["Error"] = "Error loading report form";
-            return RedirectToAction("Index", "OrderManagement");
+            return RedirectToAction("Index", "Order");
         }
     }
 
