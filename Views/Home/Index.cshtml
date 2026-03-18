@@ -1,8 +1,57 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Campus Food - Order Your Meals";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Order Delicious Food<br/>Anytime, Anywhere</h1>
+            <p class="hero-subtitle">Fast, convenient, and reliable food ordering service for campus students</p>
+            <div class="hero-actions">
+                <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-primary btn-lg">Start Ordering</a>
+                <a href="#features" class="btn btn-outline-secondary btn-lg">Learn More</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <h2 class="section-title">Why Choose Campus Food?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📦</div>
+                <h3>Quick Delivery</h3>
+                <p>Get your food delivered to your location within minutes</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🍽️</div>
+                <h3>Fresh Meals</h3>
+                <p>Prepared fresh daily by our experienced kitchen staff</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Easy to Use</h3>
+                <p>Simple and intuitive interface for seamless ordering</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Report Issues</h3>
+                <p>Let us know if anything isn't perfect - we'll make it right</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Order?</h2>
+            <p>Join thousands of satisfied students enjoying great food</p>
+            <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-primary btn-lg">Browse Menu</a>
+        </div>
+    </div>
+</section>

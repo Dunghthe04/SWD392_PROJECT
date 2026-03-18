@@ -1,0 +1,142 @@
+@model SWD392_PROJECT.ViewModels.ReportIssueViewModel
+
+@{
+    ViewData["Title"] = "Report Issue";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Report an Issue</h2>
+                    <p class="text-white-50 mb-0">Help us improve by reporting any problems with your order</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Order Information -->
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Order Information</h5>
+                        <p class="mb-2"><strong>Order ID:</strong> #@Model.OrderId</p>
+                        <p class="mb-0"><strong>Student:</strong> @Model.StudentName</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form asp-action="Report" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Issue Details -->
+                        <div class="mb-4">
+                            <label asp-for="IssueDetails" class="form-label">
+                                <strong>Issue Description</strong>
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="IssueDetails" 
+                                    class="form-control form-control-lg @(ViewData.ModelState["IssueDetails"]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")" 
+                                    rows="5" 
+                                    placeholder="Describe the issue you encountered..."
+                                    required></textarea>
+                            <small class="form-text text-muted d-block mt-2">
+                                Please provide details about what went wrong (e.g., missing items, cold food, wrong order, hygiene issues)
+                            </small>
+                            <span asp-validation-for="IssueDetails" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Evidence Image -->
+                        <div class="mb-4">
+                            <label asp-for="EvidenceImage" class="form-label">
+                                <strong>Evidence Image (Optional)</strong>
+                            </label>
+                            <input asp-for="EvidenceImage" 
+                                 type="file" 
+                                 class="form-control form-control-lg" 
+                                 accept=".jpg,.jpeg,.png"
+                                 aria-describedby="imageHelp" />
+                            <small id="imageHelp" class="form-text text-muted d-block mt-2">
+                                Supported formats: JPG, JPEG, PNG (Max 5MB recommended)
+                            </small>
+                            <span asp-validation-for="EvidenceImage" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Hidden Field -->
+                        <input asp-for="OrderId" type="hidden" />
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="bi bi-check-circle"></i> Submit Issue Report
+                            </button>
+                            <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Info Box -->
+                    <div class="alert alert-warning mt-4 mb-0">
+                        <strong>Important:</strong> Please report issues within 24 hours of receiving your order. 
+                        Our managers will review your report and respond to you as soon as possible.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0;
+    }
+
+    .form-control, .form-control-lg {
+        border-radius: 6px;
+        border: 1px solid #e1e5eb;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .form-control:focus, .form-control-lg:focus {
+        border-color: #0061ff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 97, 255, 0.25);
+    }
+
+    textarea.form-control {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background-color: #0061ff;
+        border-color: #0061ff;
+    }
+
+    .btn-primary:hover {
+        background-color: #0052d4;
+        border-color: #0052d4;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 6px;
+    }
+
+    .alert-info {
+        background-color: #f0f8ff;
+        border-left: 4px solid #0061ff;
+    }
+
+    .alert-warning {
+        background-color: #fff8e1;
+        border-left: 4px solid #ffc107;
+    }
+</style>

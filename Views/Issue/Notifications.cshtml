@@ -1,0 +1,155 @@
+@model List<SWD392_PROJECT.ViewModels.NotificationViewModel>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Issue Notifications</h1>
+                @if (Model.Any(n => !n.IsRead))
+                {
+                    <span class="badge bg-danger">@Model.Count(n => !n.IsRead) Unread</span>
+                }
+            </div>
+
+            <!-- Notifications List -->
+            @if (Model.Any())
+            {
+                <div class="notification-list">
+                    @foreach (var notification in Model.OrderByDescending(n => n.CreatedDate))
+                    {
+                        <div class="card shadow-sm border-0 mb-3 @(notification.IsRead ? "bg-light" : "border-left-primary")">
+                            <div class="card-body">
+                                <div class="row align-items-start">
+                                    <div class="col">
+                                        <div class="d-flex gap-2">
+                                            @if (!notification.IsRead)
+                                            {
+                                                <span class="badge bg-danger">NEW</span>
+                                            }
+                                            <div>
+                                                <h6 class="card-title">Issue #@notification.IssueId</h6>
+                                                <p class="card-text mb-2">@notification.Message</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar"></i>
+                                                    @notification.CreatedDate.ToString("MMM dd, yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a asp-controller="Issue" asp-action="Details" asp-route-id="@notification.IssueId" 
+                                           class="btn btn-sm btn-primary">
+                                            View Issue
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center py-5">
+                    <h5>No Notifications</h5>
+                    <p class="mb-0">All issues have been reviewed. Great job!</p>
+                </div>
+            }
+        </div>
+
+        <!-- Summary Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Summary</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Total Notifications</h6>
+                        <p class="h3 mb-0">@Model.Count</p>
+                    </div>
+
+                    <hr />
+
+                    <div class="mb-3">
+                        <h6 class="text-muted">Unread</h6>
+                        <p class="h3 mb-0" style="color: #dc3545;">@Model.Count(n => !n.IsRead)</p>
+                    </div>
+
+                    <hr />
+
+                    <div class="mb-3">
+                        <h6 class="text-muted">Read</h6>
+                        <p class="h3 mb-0" style="color: #0061ff;">@Model.Count(n => n.IsRead)</p>
+                    </div>
+
+                    @if (Model.Any(n => !n.IsRead))
+                    {
+                        <button class="btn btn-primary w-100 mt-3" onclick="markAllAsRead()">
+                            Mark All as Read
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 12px !important;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .border-left-primary {
+        border-left: 4px solid #0061ff !important;
+    }
+
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #0061ff;
+        border-color: #0061ff;
+        border-radius: 6px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0052d4;
+        border-color: #0052d4;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+    }
+
+    .notification-list .card {
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+    function markAllAsRead() {
+        // This would call an API endpoint to mark all as read
+        // For now, a placeholder implementation
+        alert('Mark all as read functionality coming soon');
+    }
+</script>
