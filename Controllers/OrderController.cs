@@ -381,12 +381,8 @@ public class OrderController : Controller
 
                 System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Total Price Calculated: {totalPrice}");
 
-                // Update order with total price and set to Paid status
-                order.TotalPrice = totalPrice;
-                order.Status = "Paid";
-
-                // Save order with the total price
-                _orderRepository.UpdateOrder(order, order.Version);
+                // Update order with total price and set to Paid status using new method
+                _orderRepository.UpdateOrderTotal(order.OrderId, totalPrice, "Paid");
                 System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Order updated with TotalPrice={totalPrice}");
             }
             catch (Exception ex)
