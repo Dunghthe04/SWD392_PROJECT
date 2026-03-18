@@ -63,3 +63,69 @@ iisexpress/
 # Others
 node_modules/
 dist/
+
+appsettings.Development.json
+appsettings.json
+
+# DoctoCode / Generated from design
+DoctoCode/
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Test Results
+*.trx
+TestResults/
+
+# Code Coverage
+coverage/
+.coverage
+
+# SonarQube
+.sonarqube/
+
+# Database files
+*.db
+*.sqlite
+
+# Temporary files
+temp/
+tmp/
+
+# Python files and virtual environments
+*.py
+*.pyc
+*.pyo
+__pycache__/
+venv/
+env/
+ENV/
+.venv/
+.env.local
+
+# IDE and Editor files
+*.vscode
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows specific
+Thumbs.db
+desktop.ini
+
+# Git-related
+.git/
+.gitattributes

@@ -1,11 +1,17 @@
 using SWD392_PROJECT.Coordinators;
 using SWD392_PROJECT.Data;
 using SWD392_PROJECT.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
+
 builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
@@ -14,6 +20,7 @@ builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ViewOrderCoordinator>();
 builder.Services.AddScoped<UpdateOrderCoordinator>();
+builder.Services.AddScoped<ReportIssueCoordinator>();
 builder.Services.AddScoped<IStaffContext, DemoStaffContext>();
 
 var app = builder.Build();
