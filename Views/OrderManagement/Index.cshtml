@@ -1,0 +1,47 @@
+@model SWD392_PROJECT.ViewModels.OrderListViewModel
+@{
+    ViewData["Title"] = "Order Management";
+}
+
+<h1>Order Management</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    var alertClass = Model.IsError ? "alert-danger" : "alert-info";
+    <div class="alert @alertClass" role="alert">@Model.Message</div>
+}
+
+@if (Model.Orders.Count == 0)
+{
+    <p>No orders are available.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Student Name</th>
+                <th>Order Time</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var order in Model.Orders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.StudentName</td>
+                <td>@order.OrderTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@order.TotalPrice.ToString("N0")</td>
+                <td>@order.Status</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@order.OrderId">Update</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
