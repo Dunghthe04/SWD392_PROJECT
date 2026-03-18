@@ -1,7 +1,7 @@
-using SWD392_PROJECT.Data;
+using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Models;
 
-namespace SWD392_PROJECT.Services;
+namespace SWD392_PROJECT.Services.Interfaces;
 
 public interface IOrderService
 {

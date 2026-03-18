@@ -1,4 +1,4 @@
-namespace SWD392_PROJECT.Services;
+namespace SWD392_PROJECT.Services.Interfaces;
 
 public interface IAuditService
 {

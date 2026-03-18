@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using SWD392_PROJECT.Data;
+using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Models;
-using SWD392_PROJECT.Services;
+using SWD392_PROJECT.Services.Interfaces;
 using SWD392_PROJECT.ViewModels;
 
 namespace SWD392_PROJECT.Controllers;
@@ -284,13 +284,13 @@ public class IssueController : Controller
     /// <summary>
     /// Helper method to upload evidence image
     /// </summary>
-    private async Task<Services.ImageUploadResult> UploadEvidenceImageAsync(int issueId, IFormFile imageFile)
+    private async Task<ImageUploadResult> UploadEvidenceImageAsync(int issueId, IFormFile imageFile)
     {
         try
         {
             if (imageFile.Length == 0)
             {
-                return new Services.ImageUploadResult
+                return new ImageUploadResult
                 {
                     Success = false,
                     Message = "File is empty"
@@ -316,7 +316,7 @@ public class IssueController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading image");
-            return new Services.ImageUploadResult
+            return new ImageUploadResult
             {
                 Success = false,
                 Message = $"Error uploading image: {ex.Message}"

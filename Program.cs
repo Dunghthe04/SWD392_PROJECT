@@ -1,6 +1,9 @@
 using SWD392_PROJECT.Coordinators;
 using SWD392_PROJECT.Data;
-using SWD392_PROJECT.Services;
+using SWD392_PROJECT.Data.Repositories.Interfaces;
+using SWD392_PROJECT.Data.Repositories.Implementations;
+using SWD392_PROJECT.Services.Interfaces;
+using SWD392_PROJECT.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

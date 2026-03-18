@@ -1,6 +1,6 @@
 using SWD392_PROJECT.Models;
 
-namespace SWD392_PROJECT.Data;
+namespace SWD392_PROJECT.Data.Repositories.Interfaces;
 
 public interface IOrderRepository
 {

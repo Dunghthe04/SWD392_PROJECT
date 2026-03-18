@@ -1,6 +1,7 @@
+using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Models;
 
-namespace SWD392_PROJECT.Data;
+namespace SWD392_PROJECT.Data.Repositories.Implementations;
 
 public class InMemoryOrderRepository : IOrderRepository
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SWD392_PROJECT.Coordinators;
 using SWD392_PROJECT.Models;
-using SWD392_PROJECT.Services;
+using SWD392_PROJECT.Services.Interfaces;
 using SWD392_PROJECT.ViewModels;
 
 namespace SWD392_PROJECT.Controllers;
