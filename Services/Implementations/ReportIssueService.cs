@@ -26,7 +26,7 @@ public class ReportIssueService : IReportIssueService
         _validationService = validationService;
     }
 
-    public async Task<IssueSubmitResult> SubmitIssueAsync(int orderId, string details, int studentId)
+    public async Task<IssueSubmitResult> SubmitIssueAsync(int orderId, string details)
     {
         // Validate inputs
         if (orderId <= 0)
@@ -47,60 +47,60 @@ public class ReportIssueService : IReportIssueService
             };
         }
 
-        // Get order from repository
-        var order = _orderRepository.ReadOrder(orderId);
-        if (order == null)
-        {
-            return new IssueSubmitResult
-            {
-                Success = false,
-                Message = "Order not found"
-            };
-        }
-
-        // Verify order belongs to student
-        if (order.StudentId != studentId)
-        {
-            return new IssueSubmitResult
-            {
-                Success = false,
-                Message = "You can only report issues on your own orders"
-            };
-        }
-
-        // Check order status - must be completed
-        if (order.Status != "Completed")
-        {
-            return new IssueSubmitResult
-            {
-                Success = false,
-                Message = "Can only report issues on completed orders"
-            };
-        }
-
-        // Validate 24-hour reporting window
-        var timeSinceCompletion = DateTime.UtcNow - order.LastUpdatedAt;
-        if (timeSinceCompletion.TotalHours > 24)
-        {
-            return new IssueSubmitResult
-            {
-                Success = false,
-                Message = "Issue reporting window (24 hours from completion) has expired"
-            };
-        }
-
         try
         {
+            // Get order from repository (using synchronous method)
+            var order = _orderRepository.ReadOrder(orderId);
+            if (order == null)
+            {
+                return new IssueSubmitResult
+                {
+                    Success = false,
+                    Message = "Order not found"
+                };
+            }
+
+            // Check order status - must be completed
+            if (order.Status != "Completed")
+            {
+                return new IssueSubmitResult
+                {
+                    Success = false,
+                    Message = "Can only report issues on completed orders. Current status: " + order.Status
+                };
+            }
+
+            // Validate 24-hour reporting window
+            var timeSinceCompletion = DateTime.UtcNow - order.LastUpdatedAt;
+            if (timeSinceCompletion.TotalHours > 24)
+            {
+                return new IssueSubmitResult
+                {
+                    Success = false,
+                    Message = "Issue reporting window (24 hours from completion) has expired. Order was completed " + timeSinceCompletion.TotalHours.ToString("F1") + " hours ago."
+                };
+            }
+
             // Create issue
             var issue = Issue.CreateIssue(orderId, details);
             var createdIssue = await _issueRepository.CreateAsync(issue);
 
+            if (createdIssue == null)
+            {
+                return new IssueSubmitResult
+                {
+                    Success = false,
+                    Message = "Failed to create issue. Please try again."
+                };
+            }
+
             // Create notification for manager
             var notification = Notification.CreateNotification(
                 createdIssue.IssueId,
-                $"New issue reported: Order #{orderId} - {details}"
+                $"New issue reported on Order #{orderId}: {details.Substring(0, Math.Min(100, details.Length))}..."
             );
-            await _notificationRepository.CreateAsync(notification);
+            
+            var createdNotification = await _notificationRepository.CreateAsync(notification);
 
             return new IssueSubmitResult
             {
@@ -112,6 +112,8 @@ public class ReportIssueService : IReportIssueService
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error submitting issue: {ex.Message}");
+            Console.WriteLine($"Exception: {ex}");
             return new IssueSubmitResult
             {
                 Success = false,

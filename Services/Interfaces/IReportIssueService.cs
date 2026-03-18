@@ -11,7 +11,7 @@ public interface IReportIssueService
     /// <summary>
     /// Submit a new issue for an order
     /// </summary>
-    Task<IssueSubmitResult> SubmitIssueAsync(int orderId, string details, int studentId);
+    Task<IssueSubmitResult> SubmitIssueAsync(int orderId, string details);
 
     /// <summary>
     /// Upload evidence image for an issue

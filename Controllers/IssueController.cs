@@ -111,33 +111,41 @@ public class IssueController : Controller
     }
 
     /// <summary>
-    /// POST: Issue/Report - Submit issue report
+    /// POST: Issue/Report/{orderId} - Submit issue report
     /// </summary>
-    [HttpPost("Report")]
+    [HttpPost("Report/{orderId}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Report(ReportIssueViewModel model)
+    public async Task<IActionResult> ReportSubmit(int orderId, ReportIssueViewModel model)
     {
         try
         {
+            // Ensure orderId in model matches URL
+            model.OrderId = orderId;
+
             if (!ModelState.IsValid)
             {
-                return View(model);
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = string.Join(", ", errors) });
+                }
+                return View("Report", model);
             }
 
-            // Get current student ID (TODO: replace with actual user ID from claims)
-            var studentId = 1; // This should come from authenticated user
-
-            // Submit issue
+            // Submit issue (StudentId will be extracted from Order in service)
             var result = await _reportIssueService.SubmitIssueAsync(
                 model.OrderId,
-                model.IssueDetails,
-                studentId
+                model.IssueDetails
             );
 
             if (!result.Success)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = result.Message });
+                }
                 ModelState.AddModelError("", result.Message);
-                return View(model);
+                return View("Report", model);
             }
 
             // Handle image upload if provided
@@ -150,14 +158,29 @@ public class IssueController : Controller
                 }
             }
 
+            // Return JSON response for AJAX request
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { 
+                    success = true, 
+                    message = "Issue reported successfully. Managers will review it shortly.",
+                    issueId = result.IssueId
+                });
+            }
+
+            // For non-AJAX requests, use redirect
             TempData["Success"] = "Issue reported successfully. Managers will review it shortly.";
             return RedirectToAction("Details", new { id = result.IssueId });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error submitting issue report");
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = false, message = "An error occurred while submitting the report. Please try again." });
+            }
             ModelState.AddModelError("", "An error occurred while submitting the report");
-            return View(model);
+            return View("Report", model);
         }
     }
 
@@ -263,6 +286,55 @@ public class IssueController : Controller
             _logger.LogError(ex, "Error loading notifications");
             TempData["Error"] = "Error loading notifications";
             return RedirectToAction("Index", "Home");
+        }
+    }
+
+    /// <summary>
+    /// GET: Issue/GetUnreadCount - Get unread notification count (API)
+    /// </summary>
+    [Authorize(Roles = "Manager")]
+    [HttpGet("GetUnreadCount")]
+    public async Task<IActionResult> GetUnreadCount()
+    {
+        try
+        {
+            var notifications = await _reportIssueService.GetUnreadNotificationsAsync();
+            var count = notifications.Count;
+            return Json(new { success = true, count = count });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting unread notification count");
+            return Json(new { success = false, count = 0 });
+        }
+    }
+
+    /// <summary>
+    /// GET: Issue/GetUnreadNotifications - Get unread notifications list (API)
+    /// </summary>
+    [Authorize(Roles = "Manager")]
+    [HttpGet("GetUnreadNotifications")]
+    public async Task<IActionResult> GetUnreadNotifications()
+    {
+        try
+        {
+            var notifications = await _reportIssueService.GetUnreadNotificationsAsync();
+            var viewModel = notifications.Select(n => new
+            {
+                notificationId = n.NotificationId,
+                issueId = n.IssueId,
+                message = n.Message,
+                isRead = n.IsRead,
+                createdDate = n.CreatedDate.ToString("MMM dd, yyyy HH:mm"),
+                createdDateRaw = n.CreatedDate
+            }).OrderByDescending(n => n.createdDateRaw).ToList();
+
+            return Json(new { success = true, notifications = viewModel });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading unread notifications");
+            return Json(new { success = false, notifications = new List<object>() });
         }
     }
 

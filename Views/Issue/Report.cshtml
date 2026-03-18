@@ -4,78 +4,148 @@
     ViewData["Title"] = "Report Issue";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">Report an Issue</h2>
-                    <p class="text-white-50 mb-0">Help us improve by reporting any problems with your order</p>
+<div class="report-container">
+    <div class="report-wrapper">
+        <div class="report-card">
+            <!-- Card Header -->
+            <div class="report-header">
+                <div class="header-content">
+                    <h1 class="report-title">Report an Issue</h1>
+                    <p class="report-subtitle">Help us improve by reporting any problems with your order</p>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="report-body">
+                <!-- Order Information -->
+                <div class="order-info-box">
+                    <div class="info-row">
+                        <span class="info-label">Order ID:</span>
+                        <span class="info-value">#@Model.OrderId</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Student:</span>
+                        <span class="info-value">@Model.StudentName</span>
+                    </div>
                 </div>
 
-                <div class="card-body p-4">
-                    <!-- Order Information -->
-                    <div class="alert alert-info">
-                        <h5 class="alert-heading">Order Information</h5>
-                        <p class="mb-2"><strong>Order ID:</strong> #@Model.OrderId</p>
-                        <p class="mb-0"><strong>Student:</strong> @Model.StudentName</p>
+                <!-- Error Messages -->
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(x => x.Errors.Count > 0))
+                {
+                    <div class="alert-error">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            @foreach (var error in modelState.Errors)
+                            {
+                                <p>@error.ErrorMessage</p>
+                            }
+                        }
+                    </div>
+                }
+
+                <!-- Form -->
+                <form asp-action="ReportSubmit" method="post" enctype="multipart/form-data" class="report-form" asp-route-orderId="@Model.OrderId">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Issue Details -->
+                    <div class="form-group">
+                        <label asp-for="IssueDetails" class="form-label">
+                            Issue Description
+                            <span class="required">*</span>
+                        </label>
+                        <textarea asp-for="IssueDetails" 
+                                class="form-control @(ViewData.ModelState["IssueDetails"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                rows="6" 
+                                placeholder="Describe the issue you encountered (e.g., missing items, cold food, wrong order, hygiene issues)..."
+                                required></textarea>
+                        <span asp-validation-for="IssueDetails" class="invalid-feedback"></span>
+                        <small class="form-hint">Minimum 10 characters required</small>
                     </div>
 
-                    <!-- Form -->
-                    <form asp-action="Report" method="post" enctype="multipart/form-data">
-                        @Html.AntiForgeryToken()
-
-                        <!-- Issue Details -->
-                        <div class="mb-4">
-                            <label asp-for="IssueDetails" class="form-label">
-                                <strong>Issue Description</strong>
-                                <span class="text-danger">*</span>
-                            </label>
-                            <textarea asp-for="IssueDetails" 
-                                    class="form-control form-control-lg @(ViewData.ModelState["IssueDetails"]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")" 
-                                    rows="5" 
-                                    placeholder="Describe the issue you encountered..."
-                                    required></textarea>
-                            <small class="form-text text-muted d-block mt-2">
-                                Please provide details about what went wrong (e.g., missing items, cold food, wrong order, hygiene issues)
-                            </small>
-                            <span asp-validation-for="IssueDetails" class="invalid-feedback"></span>
-                        </div>
-
-                        <!-- Evidence Image -->
-                        <div class="mb-4">
-                            <label asp-for="EvidenceImage" class="form-label">
-                                <strong>Evidence Image (Optional)</strong>
-                            </label>
+                    <!-- Evidence Image -->
+                    <div class="form-group">
+                        <label asp-for="EvidenceImage" class="form-label">
+                            Evidence Image
+                            <span class="optional">(Optional)</span>
+                        </label>
+                        <div class="file-input-wrapper">
                             <input asp-for="EvidenceImage" 
                                  type="file" 
-                                 class="form-control form-control-lg" 
+                                 class="file-input" 
+                                 id="evidenceImageInput"
                                  accept=".jpg,.jpeg,.png"
                                  aria-describedby="imageHelp" />
-                            <small id="imageHelp" class="form-text text-muted d-block mt-2">
-                                Supported formats: JPG, JPEG, PNG (Max 5MB recommended)
-                            </small>
-                            <span asp-validation-for="EvidenceImage" class="invalid-feedback"></span>
+                            <label for="evidenceImageInput" class="file-input-label">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Click to upload or drag and drop</span>
+                            </label>
                         </div>
 
-                        <!-- Hidden Field -->
-                        <input asp-for="OrderId" type="hidden" />
-
-                        <!-- Action Buttons -->
-                        <div class="d-flex gap-2 mt-5">
-                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
-                                <i class="bi bi-check-circle"></i> Submit Issue Report
-                            </button>
-                            <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-outline-secondary btn-lg">
-                                Cancel
-                            </a>
+                        <!-- File Status Messages -->
+                        <div id="fileSuccessMessage" class="file-success-message" style="display: none;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span id="successFileName"></span>
                         </div>
-                    </form>
 
-                    <!-- Info Box -->
-                    <div class="alert alert-warning mt-4 mb-0">
-                        <strong>Important:</strong> Please report issues within 24 hours of receiving your order. 
-                        Our managers will review your report and respond to you as soon as possible.
+                        <div id="fileErrorMessage" class="file-error-message" style="display: none;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <span id="errorMessage"></span>
+                        </div>
+
+                        <small id="imageHelp" class="form-hint">Supported: JPG, JPEG, PNG (Max 5MB)</small>
+                    </div>
+
+                    <!-- Hidden Field -->
+                    <input asp-for="OrderId" type="hidden" />
+
+                    <!-- Action Buttons -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-submit" id="submitBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Submit Issue Report
+                        </button>
+                        <a asp-controller="Order" asp-action="Index" class="btn btn-cancel">Cancel</a>
+                    </div>
+                </form>
+
+                <!-- Success Popup Message (Initially Hidden) -->
+                <div id="successPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 9999; max-width: 400px; text-align: center;">
+                    <div style="margin-bottom: 1rem;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1b7d3f" stroke-width="2" style="margin: 0 auto;">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h3 style="margin: 1rem 0; color: #1b7d3f; font-size: 1.25rem;">Report Submitted Successfully!</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Your issue has been reported. Our managers will review it shortly.</p>
+                    <button type="button" onclick="location.href='@Url.Action("Index", "Order")';" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem;">
+                        Back to Orders
+                    </button>
+                </div>
+
+                <!-- Overlay for Popup -->
+                <div id="popupOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9998;"></div>
+
+                <!-- Important Notice -->
+                <div class="alert-important">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <div>
+                        <strong>Important:</strong> You can report issues within <strong>24 hours</strong> of order completion. 
+                        Our managers will review your report and contact you as soon as possible.
                     </div>
                 </div>
             </div>
@@ -84,59 +154,452 @@
 </div>
 
 <style>
-    .card {
-        border: none;
+    .report-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
+        min-height: calc(100vh - 150px);
+        padding: 2rem 2.5rem;
+    }
+
+    .report-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .report-card {
+        background: white;
         border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
     }
 
-    .card-header {
-        border-radius: 12px 12px 0 0;
+    .report-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        padding: 2rem;
+        color: white;
     }
 
-    .form-control, .form-control-lg {
-        border-radius: 6px;
-        border: 1px solid #e1e5eb;
+    .header-content {
+        margin: 0;
+    }
+
+    .report-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        color: white;
+    }
+
+    .report-subtitle {
+        font-size: 0.95rem;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .report-body {
+        padding: 2rem;
+    }
+
+    .order-info-box {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+    }
+
+    .info-value {
+        color: #3b82f6;
+        font-weight: 600;
+    }
+
+    .report-form {
+        margin: 2rem 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: #dc3545;
+    }
+
+    .optional {
+        color: #999;
+        font-weight: 400;
+        font-size: 0.85rem;
+    }
+
+    .form-control {
+        width: 100%;
         padding: 0.75rem 1rem;
-        font-size: 1rem;
+        border: 1px solid #e1e5eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
     }
 
-    .form-control:focus, .form-control-lg:focus {
-        border-color: #0061ff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 97, 255, 0.25);
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    textarea.form-control {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    .form-control.is-invalid {
+        border-color: #dc3545;
     }
 
-    .btn-lg {
-        padding: 0.75rem 1.5rem;
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-hint {
+        display: block;
+        color: #666;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        margin-bottom: 0.75rem;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-input-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 2rem;
+        border: 2px dashed #3b82f6;
+        border-radius: 8px;
+        background: #f8f9ff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #3b82f6;
         font-weight: 500;
-        border-radius: 6px;
     }
 
-    .btn-primary {
-        background-color: #0061ff;
-        border-color: #0061ff;
+    .file-input-label:hover {
+        background: #eff6ff;
+        border-color: #2563eb;
     }
 
-    .btn-primary:hover {
-        background-color: #0052d4;
-        border-color: #0052d4;
+    .file-input-label svg {
+        stroke: currentColor;
     }
 
-    .alert {
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
     }
 
-    .alert-info {
-        background-color: #f0f8ff;
-        border-left: 4px solid #0061ff;
+    .btn-submit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
     }
 
-    .alert-warning {
-        background-color: #fff8e1;
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-cancel {
+        background: white;
+        color: #666;
+        border: 1px solid #e1e5eb;
+    }
+
+    .btn-cancel:hover {
+        background: #f8f9fa;
+        border-color: #ccc;
+    }
+
+    .alert-error {
+        background: #ffe5e5;
+        border: 1px solid #ffc2c2;
+        border-left: 4px solid #dc3545;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #721c24;
+    }
+
+    .alert-error p {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .alert-important {
+        background: #fff8e1;
+        border: 1px solid #ffe082;
         border-left: 4px solid #ffc107;
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        color: #856404;
+        font-size: 0.95rem;
+        margin-top: 2rem;
+    }
+
+    .alert-important svg {
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    @@media (max-width: 768px) {
+        .report-container {
+            padding: 1rem;
+        }
+
+        .report-header {
+            padding: 1.5rem;
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+        }
+
+        .report-body {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .file-success-message {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        color: #155724;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+        font-weight: 500;
+    }
+
+    .file-success-message svg {
+        color: #28a745;
+        flex-shrink: 0;
+    }
+
+    .file-error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        color: #721c24;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+        font-weight: 500;
+    }
+
+    .file-error-message svg {
+        color: #dc3545;
+        flex-shrink: 0;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.report-form');
+        const submitBtn = document.querySelector('.btn-submit');
+        const successPopup = document.getElementById('successPopup');
+        const popupOverlay = document.getElementById('popupOverlay');
+        const fileInput = document.getElementById('evidenceImageInput');
+        const fileSuccessMessage = document.getElementById('fileSuccessMessage');
+        const fileErrorMessage = document.getElementById('fileErrorMessage');
+        const successFileName = document.getElementById('successFileName');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // File validation
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                validateFile(e.target.files[0]);
+            });
+
+            // Drag and drop
+            const fileInputLabel = document.querySelector('.file-input-label');
+            fileInputLabel.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileInputLabel.style.borderColor = '#2563eb';
+                fileInputLabel.style.background = '#eff6ff';
+            });
+
+            fileInputLabel.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileInputLabel.style.borderColor = '#3b82f6';
+                fileInputLabel.style.background = '#f8f9ff';
+            });
+
+            fileInputLabel.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileInputLabel.style.borderColor = '#3b82f6';
+                fileInputLabel.style.background = '#f8f9ff';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    validateFile(files[0]);
+                }
+            });
+        }
+
+        function validateFile(file) {
+            if (!file) {
+                fileSuccessMessage.style.display = 'none';
+                fileErrorMessage.style.display = 'none';
+                return;
+            }
+
+            const allowedFormats = ['image/jpeg', 'image/jpg', 'image/png'];
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+            let isValid = true;
+            let errorMsg = '';
+
+            // Check file format
+            if (!allowedFormats.includes(file.type)) {
+                isValid = false;
+                errorMsg = 'Invalid file format. Please upload JPG, JPEG, or PNG files only.';
+            }
+
+            // Check file size
+            if (file.size > maxSize) {
+                isValid = false;
+                errorMsg = `File size exceeds 5MB limit. Your file is ${(file.size / 1024 / 1024).toFixed(2)}MB.`;
+            }
+
+            if (isValid) {
+                // Show success message
+                fileErrorMessage.style.display = 'none';
+                successFileName.textContent = `✓ "${file.name}" uploaded successfully`;
+                fileSuccessMessage.style.display = 'flex';
+            } else {
+                // Show error message
+                fileSuccessMessage.style.display = 'none';
+                errorMessage.textContent = errorMsg;
+                fileErrorMessage.style.display = 'flex';
+                // Clear the file input
+                fileInput.value = '';
+            }
+        }
+
+        if (form && submitBtn) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Disable submit button during submission
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                submitBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite; margin-right: 0.5rem;"><circle cx="12" cy="12" r="1"></circle><path d="M12 1a11 11 0 0 1 11 11"></path></svg> Submitting...';
+
+                // Prepare form data
+                const formData = new FormData(form);
+
+                try {
+                    // Submit form via AJAX
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Show success popup
+                        successPopup.style.display = 'block';
+                        popupOverlay.style.display = 'block';
+                        // Clear form
+                        form.reset();
+                        fileSuccessMessage.style.display = 'none';
+                    } else {
+                        // Show error message
+                        alert('Error: ' + (data.message || 'An error occurred while submitting the report.'));
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.innerHTML = originalText;
+                    }
+                } catch (error) {
+                    console.error('Submission Error:', error);
+                    alert('An error occurred while submitting the report. Please check your connection and try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+        }
+    });
+</script>

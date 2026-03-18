@@ -1,0 +1,218 @@
+@model SWD392_PROJECT.Models.Promotion
+
+@{
+    ViewData["Title"] = $"Promotion: {Model.Title}";
+}
+
+<div class="details-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Page Title -->
+                <div class="details-header">
+                    <h1 class="details-main-title">@Model.Title</h1>
+                </div>
+
+                <!-- Promotion Information Section -->
+                <div class="details-card">
+                    <h2 class="details-section-title">Promotion Information</h2>
+                    <div class="details-content">
+                        <div class="detail-row">
+                            <div class="detail-label">Promotion ID</div>
+                            <div class="detail-value">#@Model.PromotionId</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Discount Rate</div>
+                            <div class="detail-value">@Model.DiscountRate%</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                @{
+                                    var statusColor = Model.IsActive() ? "#28a745" : (Model.IsExpired() ? "#dc3545" : "#6c757d");
+                                }
+                                <span class="status-badge" style="background-color: @statusColor;">
+                                    @(Model.IsActive() ? "Active" : (Model.IsExpired() ? "Expired" : Model.Status))
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Section -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="details-card">
+                        <h2 class="details-section-title">Description</h2>
+                        <div class="details-content">
+                            <div class="detail-row">
+                                <div class="detail-label">Details</div>
+                                <div class="detail-value">@Model.Description</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Timeline Section -->
+                <div class="details-card">
+                    <h2 class="details-section-title">Timeline</h2>
+                    <div class="details-content">
+                        <div class="detail-row">
+                            <div class="detail-label">Created On</div>
+                            <div class="detail-value">@Model.CreatedDate.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Expiry Date</div>
+                            <div class="detail-value">@Model.ExpiryDate.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Days Remaining</div>
+                            <div class="detail-value">
+                                @{
+                                    var daysRemaining = (Model.ExpiryDate.Date - DateTime.UtcNow.Date).Days;
+                                    if (daysRemaining >= 0)
+                                    {
+                                        @daysRemaining @if(daysRemaining == 1) { <text>day</text> } else { <text>days</text> }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Expired</span>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Last Updated</div>
+                            <div class="detail-value">@Model.LastUpdatedDate.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons-container">
+                    <a href="@Url.Action("GetAllPromotions")" class="action-btn btn-secondary">Back to Promotions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .details-container {
+        background-color: #f9f9f9;
+        padding: 2rem 0;
+        min-height: calc(100vh - 150px);
+    }
+
+    .details-header {
+        margin-bottom: 2rem;
+    }
+
+    .details-main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+    }
+
+    .details-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .details-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #212529;
+        padding: 1.25rem;
+        margin: 0;
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+    }
+
+    .details-content {
+        padding: 1.25rem;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 2rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: start;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.95rem;
+    }
+
+    .detail-value {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .action-buttons-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .action-btn.btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .action-btn.btn-primary:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .action-btn.btn-secondary {
+        background-color: white;
+        color: #212529;
+        border-color: #e9ecef;
+    }
+
+    .action-btn.btn-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+    }
+</style>
