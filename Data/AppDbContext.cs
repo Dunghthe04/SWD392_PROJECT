@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Promotion> Promotions { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,5 +118,8 @@ public class AppDbContext : DbContext
             entity.HasIndex(p => p.Status).HasDatabaseName("IX_Promotion_Status");
             entity.HasIndex(p => p.ExpiryDate).HasDatabaseName("IX_Promotion_ExpiryDate");
         });
+        modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasColumnType("real");
     }
 }

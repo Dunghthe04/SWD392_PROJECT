@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Create Payment";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">💳 Thanh toán đơn hàng</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Error Messages -->
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>❌ Lỗi!</strong>
+                            <p class="mb-0">@TempData["Error"]</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Success Messages -->
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>✓ Thành công!</strong>
+                            <p class="mb-0">@TempData["Message"]</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Information -->
+                    <div class="alert alert-info mb-3">
+                        <p class="mb-0">
+                            <strong>ℹ️ Lưu ý:</strong> Đây là chế độ demo. Không có gọi đến VNPay thực tế. 
+                            Hệ thống sẽ mô phỏng kết quả thanh toán (Thành công / Huỷ / Timeout) ngẫu nhiên.
+                        </p>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form asp-action="CreatePaymentRequest" method="post" class="row g-3">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="col-12">
+                            <label for="orderIdInput" class="form-label">
+                                <strong>Mã đơn hàng (Order ID) <span class="text-danger">*</span></strong>
+                            </label>
+                            <input id="orderIdInput" name="orderId" type="number" value="@ViewBag.OrderId" class="form-control" placeholder="Nhập mã đơn hàng" required />
+                            <small class="text-muted">Vui lòng nhập ID của đơn hàng muốn thanh toán</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="amount" class="form-label">
+                                <strong>Số tiền thanh toán (Amount) <span class="text-danger">*</span></strong>
+                            </label>
+                            <div class="input-group">
+                                <input id="amount" name="amount" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                                <span class="input-group-text">VND</span>
+                            </div>
+                            @if (ViewBag.OrderTotal != null)
+                            {
+                                <small class="text-muted">
+                                    📋 Tổng tiền đơn hàng: <strong>@String.Format("{0:N0}", (decimal)ViewBag.OrderTotal) VND</strong>
+                                </small>
+                            }
+                            else
+                            {
+                                <small class="text-muted">Nhập số tiền muốn thanh toán</small>
+                            }
+                        </div>
+
+                        <div class="col-12">
+                            <button class="btn btn-primary btn-lg w-100" type="submit">
+                                <i class="bi bi-credit-card"></i> Thanh toán với VNPay (Demo)
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr />
+
+                    <!-- Additional Actions -->
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a asp-action="List" class="btn btn-outline-secondary">
+                            <i class="bi bi-list"></i> Xem danh sách thanh toán
+                        </a>
+                        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-info">
+                            <i class="bi bi-receipt"></i> Xem đơn hàng
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> Trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">ℹ️ Hướng dẫn sử dụng</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Nhập <strong>mã đơn hàng (Order ID)</strong> của bạn</li>
+                        <li>Nhập <strong>số tiền thanh toán</strong> (phải bằng tổng tiền đơn hàng)</li>
+                        <li>Nhấn nút <strong>"Thanh toán"</strong></li>
+                        <li>Hệ thống sẽ mô phỏng kết quả từ VNPay (có thể là Thành công, Huỷ, hoặc Timeout)</li>
+                        <li>Xem chi tiết kết quả thanh toán trên trang kết quả</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
