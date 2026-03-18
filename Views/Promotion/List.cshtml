@@ -1,0 +1,277 @@
+@model List<SWD392_PROJECT.Models.Promotion>
+
+@{
+    ViewData["Title"] = "Promotions";
+}
+
+<div class="details-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Page Header -->
+                <div class="details-header">
+                    <h1 class="details-main-title">Promotions</h1>
+                </div>
+
+                <!-- Promotions List -->
+                @if (Model != null && Model.Count > 0)
+                {
+                    <div class="details-card">
+                        <h2 class="details-section-title">
+                            <span>Available Offers</span>
+                            <span class="promotion-count">@Model.Count</span>
+                        </h2>
+                        <div class="details-content">
+                            @foreach (var promotion in Model)
+                            {
+                                <a href="@Url.Action("GetPromotionDetail", new { promotionId = promotion.PromotionId })" class="promotion-item">
+                                    <div class="promotion-main">
+                                        <div class="promotion-left">
+                                            <div class="promotion-discount">@promotion.DiscountRate</div>
+                                        </div>
+                                        <div class="promotion-middle">
+                                            <h3 class="promotion-title">@promotion.Title</h3>
+                                            <p class="promotion-desc">
+                                                @if (!string.IsNullOrEmpty(promotion.Description))
+                                                {
+                                                    @promotion.Description
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No description</span>
+                                                }
+                                            </p>
+                                        </div>
+                                        <div class="promotion-right">
+                                            <span class="status-badge" style="background-color: @(promotion.IsActive() ? "#28a745" : "#dc3545");">
+                                                @(promotion.IsActive() ? "Active" : "Expired")
+                                            </span>
+                                            <div class="expiry-date">@promotion.ExpiryDate.ToString("MMM dd")</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="details-card">
+                        <div class="details-content" style="text-align: center; padding: 2rem;">
+                            <p class="text-muted">No promotions available at the moment. Check back soon!</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="action-buttons-container">
+                    <a href="@Url.Action("GetActivePromotions")" class="action-btn btn-primary">Active Offers Only</a>
+                    <a href="@Url.Action("Index", "Home")" class="action-btn btn-secondary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .details-container {
+        background-color: #f9f9f9;
+        padding: 2rem 0;
+        min-height: calc(100vh - 150px);
+    }
+
+    .details-header {
+        margin-bottom: 2rem;
+    }
+
+    .details-main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+    }
+
+    .details-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .details-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #212529;
+        padding: 1.25rem;
+        margin: 0;
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .promotion-count {
+        background-color: #e9ecef;
+        color: #212529;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .details-content {
+        padding: 0;
+    }
+
+    .promotion-item {
+        display: block;
+        padding: 1.25rem;
+        border-bottom: 1px solid #f0f0f0;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .promotion-item:last-child {
+        border-bottom: none;
+    }
+
+    .promotion-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .promotion-main {
+        display: grid;
+        grid-template-columns: 80px 1fr 150px;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .promotion-left {
+        text-align: center;
+    }
+
+    .promotion-discount {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #dc3545;
+        line-height: 1;
+    }
+
+    .promotion-discount::after {
+        content: "%";
+        display: block;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .promotion-middle {
+        flex: 1;
+    }
+
+    .promotion-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .promotion-desc {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+
+    .promotion-right {
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .expiry-date {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .action-buttons-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .action-btn.btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .action-btn.btn-primary:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .action-btn.btn-secondary {
+        background-color: white;
+        color: #212529;
+        border-color: #e9ecef;
+    }
+
+    .action-btn.btn-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+    }
+
+    @@media (max-width: 768px) {
+        .promotion-main {
+            grid-template-columns: 60px 1fr 80px;
+            gap: 1rem;
+        }
+
+        .promotion-discount {
+            font-size: 1.5rem;
+        }
+
+        .promotion-title {
+            font-size: 0.95rem;
+        }
+
+        .promotion-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+    }
+</style>

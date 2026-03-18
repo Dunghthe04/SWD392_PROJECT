@@ -1,0 +1,367 @@
+@model SWD392_PROJECT.ViewModels.IssueDetailViewModel
+
+@{
+    ViewData["Title"] = $"Issue #{Model.IssueId}";
+}
+
+<div class="details-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Page Title -->
+                <div class="details-header">
+                    <h1 class="details-main-title">Details</h1>
+                </div>
+
+                <!-- Issue Information Section -->
+                <div class="details-card">
+                    <h2 class="details-section-title">Issue Information</h2>
+                    <div class="details-content">
+                        <div class="detail-row">
+                            <div class="detail-label">Issue ID</div>
+                            <div class="detail-value">#@Model.IssueId</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Order ID</div>
+                            <div class="detail-value">#@Model.OrderId</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Student Name</div>
+                            <div class="detail-value">@Model.StudentName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                @{
+                                    var statusColor = Model.Status switch
+                                    {
+                                        "Open" => "#dc3545",
+                                        "In Progress" => "#ffc107",
+                                        "Resolved" => "#28a745",
+                                        "Closed" => "#6c757d",
+                                        _ => "#6c757d"
+                                    };
+                                }
+                                <span class="status-badge" style="background-color: @statusColor;">@Model.Status</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Details Section -->
+                <div class="details-card">
+                    <h2 class="details-section-title">Issue Details</h2>
+                    <div class="details-content">
+                        <div class="detail-row">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">@Model.Details</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.ImagePath))
+                        {
+                            <div class="detail-row">
+                                <div class="detail-label">Evidence Image</div>
+                                <div class="detail-value">
+                                    <img src="@Model.ImagePath" alt="Issue Evidence" class="evidence-image" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Timeline Section -->
+                <div class="details-card">
+                    <h2 class="details-section-title">Timeline</h2>
+                    <div class="details-content">
+                        <div class="detail-row">
+                            <div class="detail-label">Reported On</div>
+                            <div class="detail-value">@Model.CreatedDate.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Last Updated</div>
+                            <div class="detail-value">@Model.LastUpdatedDate.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons-container">
+                    <a href="@Url.Action("List", "Issue")" class="action-btn btn-secondary">Back to Issues</a>
+                    <a href="@Url.Action("Index", "Order")" class="action-btn btn-primary">View Order</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    .details-container {
+        background-color: #f9f9f9;
+        padding: 2rem 0;
+        min-height: calc(100vh - 150px);
+    }
+
+    .details-header {
+        margin-bottom: 2rem;
+    }
+
+    .details-main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+    }
+
+    .details-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .details-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #212529;
+        padding: 1.25rem;
+        margin: 0;
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+    }
+
+    .details-content {
+        padding: 1.25rem;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 2rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: start;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.95rem;
+    }
+
+    .detail-value {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .evidence-image {
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+
+    .action-buttons-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .action-btn.btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .action-btn.btn-primary:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .action-btn.btn-secondary {
+        background-color: white;
+        color: #212529;
+        border-color: #e9ecef;
+    }
+
+    .action-btn.btn-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+    }
+
+    /* Sidebar Styles */
+    .sidebar-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #212529;
+        padding: 1.25rem;
+        margin: 0;
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+    }
+
+    .notifications-content {
+        padding: 1.25rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notification-badge {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .notification-row {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .notification-row:last-child {
+        border-bottom: none;
+    }
+
+    .notification-row.unread {
+        background-color: #f0f7ff;
+        padding: 0.75rem;
+        margin: 0 -1.25rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    .notification-message {
+        margin: 0 0 0.25rem 0;
+        color: #212529;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .notification-time {
+        margin: 0;
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #999;
+        font-size: 0.95rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+    }
+
+    .status-form-content {
+        padding: 1.25rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+    }
+
+    .submit-button:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    @@media (max-width: 992px) {
+        .detail-row {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        .details-main-title {
+            font-size: 2rem;
+        }
+
+        .action-buttons-container {
+            flex-direction: column;
+        }
+    }
+</style>

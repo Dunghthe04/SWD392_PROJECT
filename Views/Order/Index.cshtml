@@ -1,0 +1,352 @@
+@model SWD392_PROJECT.ViewModels.OrderListViewModel
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="container-fluid order-container">
+    <div class="order-header mb-4">
+        <h1 class="order-title">My Orders</h1>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        var alertClass = Model.IsError ? "alert-danger" : "alert-info";
+        <div class="alert @alertClass alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="alert alert-info" role="alert">
+            <p class="mb-0">No orders are available at this time.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="table orders-table">
+                <thead class="orders-table-head">
+                    <tr>
+                        <th class="col-order-id">Order ID</th>
+                        <th class="col-student-name">Student Name</th>
+                        <th class="col-order-time">Order Time</th>
+                        <th class="col-total-price">Total Price</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="orders-table-body">
+                @foreach (var order in Model.Orders)
+                {
+                    <tr class="order-row">
+                        <td class="col-order-id"><strong>#@order.OrderId</strong></td>
+                        <td class="col-student-name">@order.StudentName</td>
+                        <td class="col-order-time">@order.OrderTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="col-total-price">
+                            <span class="price-value">@order.TotalPrice.ToString("N0")</span> VND
+                        </td>
+                        <td class="col-status">
+                            @{
+                                var statusClass = order.Status switch
+                                {
+                                    "Pending" => "status-badge status-pending",
+                                    "Completed" => "status-badge status-completed",
+                                    "Cancelled" => "status-badge status-cancelled",
+                                    "Confirmed" => "status-badge status-confirmed",
+                                    _ => "status-badge status-default"
+                                };
+                            }
+                            <span class="@statusClass">@order.Status</span>
+                        </td>
+                        <td class="col-actions">
+                            <div class="action-buttons">
+                                @if (order.IsUpdatable())
+                                {
+                                    <a class="btn btn-action-update" asp-action="Edit" asp-route-id="@order.OrderId" title="Edit Order">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Update
+                                    </a>
+                                }
+                                @if (User.IsInRole("Student"))
+                                {
+                                    <a class="btn btn-action-report" asp-controller="Issue" asp-action="Report" asp-route-orderId="@order.OrderId" title="Report Issue">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                                            <path d="M12 8v4m0 4h.01"></path>
+                                        </svg>
+                                        Report
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .order-container {
+        padding: 2rem 2.5rem;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 200px);
+    }
+
+    .order-header {
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .order-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+        margin: 0;
+    }
+
+    .table-wrapper {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        display: block;
+        width: 100%;
+    }
+
+    .orders-table {
+        margin: 0;
+        border-collapse: collapse;
+        width: 100%;
+        display: table;
+    }
+
+    .orders-table-head {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .orders-table-head th {
+        padding: 1.25rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        vertical-align: middle;
+    }
+
+    .orders-table-body tr:hover {
+        background-color: #f0f7ff;
+        transition: background-color 0.2s ease;
+    }
+
+    .orders-table-body td {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+
+    .order-row:last-child td {
+        border-bottom: none;
+    }
+
+    .col-order-id {
+        font-weight: 600;
+        color: #3b82f6;
+        width: 10%;
+    }
+
+    .col-student-name {
+        width: 20%;
+        color: #212529;
+    }
+
+    .col-order-time {
+        width: 18%;
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .col-total-price {
+        width: 15%;
+        font-weight: 600;
+    }
+
+    .price-value {
+        color: #1b5e20;
+        font-size: 1.05rem;
+    }
+
+    .col-status {
+        width: 12%;
+        text-align: center;
+    }
+
+    .col-actions {
+        width: 25%;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-confirmed {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-default {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action-update,
+    .btn-action-report {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-action-update {
+        color: #3b82f6;
+        background-color: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .btn-action-update:hover {
+        background-color: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-action-report {
+        color: #dc3545;
+        background-color: #ffe5e5;
+        border-color: #ffc2c2;
+    }
+
+    .btn-action-report:hover {
+        background-color: #dc3545;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .col-order-id { width: 12%; }
+        .col-student-name { width: 18%; }
+        .col-order-time { width: 18%; }
+        .col-total-price { width: 15%; }
+        .col-status { width: 12%; }
+        .col-actions { width: 25%; }
+    }
+
+    @@media (max-width: 992px) {
+        .order-container {
+            padding: 1.5rem;
+        }
+
+        .orders-table-head th {
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .orders-table-body td {
+            padding: 0.75rem;
+        }
+
+        .col-order-id { width: 10%; }
+        .col-student-name { width: 20%; }
+        .col-order-time { width: 15%; }
+        .col-total-price { width: 12%; }
+        .col-status { width: 13%; }
+        .col-actions { width: 30%; }
+
+        .btn-action-update,
+        .btn-action-report {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .order-container {
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .table-wrapper {
+            border-radius: 8px;
+        }
+
+        .orders-table-head th {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .orders-table-body td {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .col-actions {
+            font-size: 0.7rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn-action-update,
+        .btn-action-report {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>

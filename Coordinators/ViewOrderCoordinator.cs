@@ -1,4 +1,4 @@
-using SWD392_PROJECT.Services;
+using SWD392_PROJECT.Services.Interfaces;
 
 namespace SWD392_PROJECT.Coordinators;
 

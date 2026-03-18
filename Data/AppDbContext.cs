@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Issue> Issues { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<Promotion> Promotions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -98,6 +99,23 @@ public class AppDbContext : DbContext
             entity.Property(a => a.OrderId).IsRequired();
             entity.Property(a => a.StaffId).IsRequired();
             entity.Property(a => a.ActionType).HasMaxLength(255).IsRequired();
+        });
+
+        // Configure Promotion entity
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.HasKey(p => p.PromotionId);
+            entity.Property(p => p.Title).HasMaxLength(200).IsRequired();
+            entity.Property(p => p.Description).HasMaxLength(500);
+            entity.Property(p => p.DiscountRate).IsRequired();
+            entity.Property(p => p.ExpiryDate).IsRequired();
+            entity.Property(p => p.Status).HasMaxLength(20).IsRequired().HasDefaultValue("Active");
+            entity.Property(p => p.CreatedDate).IsRequired().HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(p => p.LastUpdatedDate).IsRequired().HasDefaultValueSql("GETUTCDATE()");
+
+            // Create indexes for filtering
+            entity.HasIndex(p => p.Status).HasDatabaseName("IX_Promotion_Status");
+            entity.HasIndex(p => p.ExpiryDate).HasDatabaseName("IX_Promotion_ExpiryDate");
         });
     }
 }
