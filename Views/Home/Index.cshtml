@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Campus Food - Order Your Meals";
 }
 
@@ -9,8 +9,15 @@
             <h1 class="hero-title">Order Delicious Food<br/>Anytime, Anywhere</h1>
             <p class="hero-subtitle">Fast, convenient, and reliable food ordering service for campus students</p>
             <div class="hero-actions">
-                <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-primary btn-lg">Start Ordering</a>
+                <a asp-controller="Menu" asp-action="Browse" class="btn btn-primary btn-lg">Browse Menu</a>
+                <a asp-controller="Order" asp-action="Index" class="btn btn-success btn-lg">Start Ordering</a>
                 <a href="#features" class="btn btn-outline-secondary btn-lg">Learn More</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Profile" asp-action="Edit" class="btn btn-info btn-lg">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                }
             </div>
         </div>
     </div>
@@ -51,7 +58,7 @@
         <div class="cta-content">
             <h2>Ready to Order?</h2>
             <p>Join thousands of satisfied students enjoying great food</p>
-            <a asp-controller="OrderManagement" asp-action="Index" class="btn btn-primary btn-lg">Browse Menu</a>
+            <a asp-controller="Order" asp-action="Index" class="btn btn-primary btn-lg">Browse Menu</a>
         </div>
     </div>
 </section>

@@ -41,7 +41,7 @@ public class EditOrderViewModel
                 MenuItemId = item.MenuItemId,
                 ItemName = item.ItemName,
                 Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice
+                UnitPrice = (decimal)item.UnitPrice
             }).ToList()
         };
     }
