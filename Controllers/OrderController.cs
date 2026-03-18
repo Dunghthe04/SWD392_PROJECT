@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SWD392_PROJECT.Coordinators;
 using SWD392_PROJECT.Models;
@@ -6,6 +7,7 @@ using SWD392_PROJECT.ViewModels;
 
 namespace SWD392_PROJECT.Controllers;
 
+[Authorize]
 [Route("[controller]")]
 public class OrderController : Controller
 {

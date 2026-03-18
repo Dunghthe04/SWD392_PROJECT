@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SWD392_PROJECT.Data.Repositories.Interfaces;
 using SWD392_PROJECT.Models;
@@ -10,6 +11,7 @@ namespace SWD392_PROJECT.Controllers;
 /// Controller for UC11 - Report Issue
 /// Handles issue reporting, evidence upload, and issue management
 /// </summary>
+[Authorize]
 [Route("[controller]")]
 public class IssueController : Controller
 {
@@ -33,6 +35,7 @@ public class IssueController : Controller
     /// <summary>
     /// GET: Issue/List - Display list of issues
     /// </summary>
+    [Authorize(Roles = "Manager")]
     [HttpGet("List")]
     public async Task<IActionResult> List(string? status = null)
     {
@@ -236,6 +239,7 @@ public class IssueController : Controller
     /// <summary>
     /// GET: Issue/Notifications - Display manager notifications
     /// </summary>
+    [Authorize(Roles = "Manager")]
     [HttpGet("Notifications")]
     public async Task<IActionResult> Notifications()
     {
@@ -321,6 +325,25 @@ public class IssueController : Controller
                 Success = false,
                 Message = $"Error uploading image: {ex.Message}"
             };
+        }
+    }
+
+    /// <summary>
+    /// GET: Issue/GetNotificationCount - Get unread notification count (API)
+    /// </summary>
+    [Authorize(Roles = "Manager")]
+    [HttpGet("GetNotificationCount")]
+    public async Task<IActionResult> GetNotificationCount()
+    {
+        try
+        {
+            var notifications = await _reportIssueService.GetUnreadNotificationsAsync();
+            return Json(new { count = notifications.Count });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting notification count");
+            return Json(new { count = 0 });
         }
     }
 }

@@ -1,0 +1,238 @@
+@{
+    ViewData["Title"] = "Login";
+    Layout = null; // Don't use the standard layout
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Campus Food</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #0061ff 0%, #0052d4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2.5rem;
+            color: #0061ff;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .role-selection {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .role-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .role-button:hover {
+            border-color: #0061ff;
+            background-color: #f5f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 97, 255, 0.15);
+        }
+
+        .role-button input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .role-button input[type="radio"]:checked + label {
+            color: white;
+        }
+
+        .role-button input[type="radio"]:checked {
+            opacity: 1;
+        }
+
+        .role-button.student:has(input:checked),
+        .role-button.student:hover {
+            border-color: #28a745;
+            background-color: #28a745;
+            color: white;
+        }
+
+        .role-button.staff:has(input:checked),
+        .role-button.staff:hover {
+            border-color: #ffc107;
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .role-button.manager:has(input:checked),
+        .role-button.manager:hover {
+            border-color: #dc3545;
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .role-button label {
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            margin: 0;
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+
+        .submit-button {
+            width: 100%;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #0061ff 0%, #0052d4 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 97, 255, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            margin-top: 1rem;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0 1.5rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #999;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🍽️</h1>
+            <h1>Campus Food</h1>
+            <p>Select your role to continue</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                @foreach (var error in modelState.Errors)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @error.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+            }
+        }
+
+        <form method="post" asp-action="Login">
+            @Html.AntiForgeryToken()
+
+            <div class="role-selection">
+                <!-- Student -->
+                <div class="role-button student">
+                    <input type="radio" id="student" name="role" value="Student" />
+                    <label for="student">
+                        <span class="role-icon">👨‍🎓</span>
+                        <span>Student</span>
+                    </label>
+                </div>
+
+                <!-- Canteen Staff -->
+                <div class="role-button staff">
+                    <input type="radio" id="staff" name="role" value="CanteenStaff" />
+                    <label for="staff">
+                        <span class="role-icon">👨‍💼</span>
+                        <span>Canteen Staff</span>
+                    </label>
+                </div>
+
+                <!-- Manager -->
+                <div class="role-button manager">
+                    <input type="radio" id="manager" name="role" value="Manager" />
+                    <label for="manager">
+                        <span class="role-icon">👨‍💼</span>
+                        <span>Manager</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-button">Login</button>
+        </form>
+
+        <div class="divider">Demo Credentials</div>
+        <div class="footer-text">
+            <p>This is a demo application. Select any role above to access the system.</p>
+            <p style="margin-top: 1rem;">
+                <strong>Student:</strong> View and report issues on orders<br>
+                <strong>Canteen Staff:</strong> Manage orders<br>
+                <strong>Manager:</strong> View notifications and issue management
+            </p>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

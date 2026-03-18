@@ -68,7 +68,7 @@
                                         <i class="bi bi-pencil"></i> Update
                                     </a>
                                 }
-                                @if (order.Status == "Completed")
+                                @if (order.Status == "Completed" && User.IsInRole("Student"))
                                 {
                                     <a class="btn btn-outline-danger" asp-controller="Issue" asp-action="Report" asp-route-orderId="@order.OrderId" title="Report Issue">
                                         <i class="bi bi-exclamation-triangle"></i> Report Issue
