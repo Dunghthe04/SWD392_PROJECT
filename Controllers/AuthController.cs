@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -7,6 +8,7 @@ namespace SWD392_PROJECT.Controllers;
 [Route("[controller]")]
 public class AuthController : Controller
 {
+    [AllowAnonymous]
     [HttpGet("")]
     [HttpGet("Login")]
     public IActionResult Login()
@@ -88,5 +90,12 @@ public class AuthController : Controller
     {
         await HttpContext.SignOutAsync("CookieAuth");
         return RedirectToAction("Login");
+    }
+
+    [AllowAnonymous]
+    [HttpGet("AccessDenied")]
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 }

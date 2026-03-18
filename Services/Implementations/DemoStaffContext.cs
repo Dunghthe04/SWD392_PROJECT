@@ -24,8 +24,8 @@ public class DemoStaffContext : IStaffContext
                 return false;
 
             var role = HttpContext?.User?.FindFirst("Role")?.Value;
-            // Both CanteenStaff and Manager can manage orders
-            return role == "CanteenStaff" || role == "Manager";
+            // Student, CanteenStaff and Manager can view/manage orders
+            return role == "Student" || role == "CanteenStaff" || role == "Manager";
         }
     }
 

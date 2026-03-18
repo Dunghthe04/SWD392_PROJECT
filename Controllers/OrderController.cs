@@ -7,7 +7,7 @@ using SWD392_PROJECT.ViewModels;
 
 namespace SWD392_PROJECT.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Student,CanteenStaff,Manager")]
 [Route("[controller]")]
 public class OrderController : Controller
 {

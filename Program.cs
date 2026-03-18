@@ -13,12 +13,17 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews();
 
 // Add Authentication
-builder.Services.AddAuthentication("CookieAuth").AddCookie("CookieAuth", options =>
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
 {
     options.LoginPath = "/Auth/Login";
     options.LogoutPath = "/Auth/Logout";
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.AccessDeniedPath = "/Auth/AccessDenied";
 });
+
+// Add Authorization
+builder.Services.AddAuthorization();
 
 // Add DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
