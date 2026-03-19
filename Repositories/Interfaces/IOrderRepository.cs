@@ -12,6 +12,8 @@ public interface IOrderRepository
 
     void CreateOrder(Order order);
 
+    void UpdateOrderTotal(int orderId, decimal totalPrice, string status);
+
     bool DeleteOrder(int orderId);
 
     void AddAuditLog(AuditLog log);

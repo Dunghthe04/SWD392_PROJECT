@@ -84,10 +84,18 @@ public class AppDbContext : DbContext
         // Configure OrderItem entity
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(oi => new { oi.OrderId, oi.MenuItemId });
+            entity.HasKey(oi => oi.OrderItemId);
+            entity.Property(oi => oi.OrderId).IsRequired();
+            entity.Property(oi => oi.MenuItemId).IsRequired();
             entity.Property(oi => oi.ItemName).HasMaxLength(255).IsRequired();
             entity.Property(oi => oi.Quantity).IsRequired();
             entity.Property(oi => oi.UnitPrice).IsRequired();
+
+            // Foreign key relationship
+            entity.HasOne<Order>()
+                .WithMany(o => o.Items)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Configure Issue entity

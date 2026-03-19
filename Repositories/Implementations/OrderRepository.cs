@@ -117,6 +117,35 @@ public class OrderRepository : IOrderRepository
     }
 
     /// <summary>
+    /// Update only order total and status without modifying items
+    /// Used for order placement to save total price correctly
+    /// </summary>
+    public void UpdateOrderTotal(int orderId, decimal totalPrice, string status)
+    {
+        try
+        {
+            var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
+            if (order is null)
+            {
+                throw new InvalidOperationException($"Order {orderId} not found");
+            }
+
+            order.TotalPrice = totalPrice;
+            order.Status = status;
+            order.LastUpdatedAt = DateTime.UtcNow;
+
+            _context.Orders.Update(order);
+            _context.SaveChanges();
+            Console.WriteLine($"[UpdateOrderTotal] Order {orderId} updated: TotalPrice={totalPrice}, Status={status}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[UpdateOrderTotal] Error: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Delete an order from the database
     /// </summary>
     public bool DeleteOrder(int orderId)
