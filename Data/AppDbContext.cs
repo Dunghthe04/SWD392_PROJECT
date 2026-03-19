@@ -69,6 +69,7 @@ public class AppDbContext : DbContext
             entity.Property(o => o.StudentName).HasMaxLength(255);
             entity.Property(o => o.Status).HasMaxLength(50).HasDefaultValue("Pending");
             entity.Property(o => o.Notes).HasMaxLength(1000);
+            entity.Property(o => o.TotalPrice).HasPrecision(18, 2);
 
             entity.HasMany(o => o.Items)
                 .WithOne()
@@ -101,7 +102,7 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(p => p.PaymentId);
             entity.Property(p => p.OrderId).IsRequired();
-            entity.Property(p => p.Amount).HasPrecision(18, 2);
+            entity.Property(p => p.Amount).IsRequired();
             entity.Property(p => p.Status).HasMaxLength(50);
             
             // Relationship: Payment belongs to Order
@@ -116,7 +117,7 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(p => p.ProductId);
             entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
-            entity.Property(p => p.Price).HasPrecision(18, 2);
+            entity.Property(p => p.Price).IsRequired();
         });
 
         // Configure StallProduct entity
@@ -205,8 +206,6 @@ public class AppDbContext : DbContext
             entity.HasIndex(p => p.Status).HasDatabaseName("IX_Promotion_Status");
             entity.HasIndex(p => p.ExpiryDate).HasDatabaseName("IX_Promotion_ExpiryDate");
         });
-        modelBuilder.Entity<Payment>()
-                .Property(p => p.Amount)
-                .HasColumnType("real");
+       
     }
 }

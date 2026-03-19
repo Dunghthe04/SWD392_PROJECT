@@ -160,6 +160,7 @@ namespace SWD392_PROJECT.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Version")
@@ -208,7 +209,6 @@ namespace SWD392_PROJECT.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
                     b.Property<float>("Amount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("real");
 
                     b.Property<int>("OrderId")
@@ -261,8 +261,7 @@ namespace SWD392_PROJECT.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<double>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("float(18)");
+                        .HasColumnType("float");
 
                     b.Property<string>("SellingTime")
                         .IsRequired()

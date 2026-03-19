@@ -12,8 +12,8 @@ using SWD392_PROJECT.Data;
 namespace SWD392_PROJECT.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260318143710_InitNew")]
-    partial class InitNew
+    [Migration("20260319075501_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,8 +149,10 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -171,35 +173,32 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasIndex("StallId");
 
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Order_Status");
+
                     b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.OrderItem", b =>
                 {
-                    b.Property<int>("MenuItemId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MenuItemId"));
+                    b.Property<int>("MenuItemId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("float");
 
-                    b.HasKey("MenuItemId");
-
-                    b.HasIndex("OrderId");
+                    b.HasKey("OrderId", "MenuItemId");
 
                     b.ToTable("OrderItems");
                 });
@@ -212,9 +211,8 @@ namespace SWD392_PROJECT.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -233,9 +231,32 @@ namespace SWD392_PROJECT.Migrations
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Product", b =>
                 {
-                    b.Property<string>("ProductId")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("ProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsAvailable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -245,10 +266,21 @@ namespace SWD392_PROJECT.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int>("StockQuantity")
-                        .HasColumnType("int");
+                    b.Property<string>("SellingTime")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("IX_Product_Category");
+
+                    b.HasIndex("IsAvailable")
+                        .HasDatabaseName("IX_Product_IsAvailable");
 
                     b.ToTable("Products");
                 });
@@ -323,6 +355,93 @@ namespace SWD392_PROJECT.Migrations
                     b.ToTable("Stalls");
                 });
 
+            modelBuilder.Entity("SWD392_PROJECT.Models.StallProduct", b =>
+                {
+                    b.Property<int>("StallProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StallProductId"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StallId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StallProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("StallId");
+
+                    b.ToTable("StallProducts");
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("AvatarPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Student");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_User_Email");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("IX_User_Username");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>
                 {
                     b.HasOne("SWD392_PROJECT.Models.Order", "Order")
@@ -358,7 +477,8 @@ namespace SWD392_PROJECT.Migrations
                     b.HasOne("SWD392_PROJECT.Models.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Payment", b =>
@@ -368,6 +488,25 @@ namespace SWD392_PROJECT.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.StallProduct", b =>
+                {
+                    b.HasOne("SWD392_PROJECT.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392_PROJECT.Models.Stall", "Stall")
+                        .WithMany()
+                        .HasForeignKey("StallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Stall");
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>
