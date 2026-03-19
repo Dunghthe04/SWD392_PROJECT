@@ -1,0 +1,164 @@
+@model SWD392_PROJECT.Models.Payment
+
+@{
+    ViewData["Title"] = "Payment Result";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Status Alert Section -->
+            @if (!string.IsNullOrEmpty(Model.Status))
+            {
+                if (Model.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">✓ Thanh toán thành công!</h4>
+                        <p>Cảm ơn bạn đã thanh toán. Đơn hàng của bạn đã được cập nhật trạng thái thành "Paid".</p>
+                        <hr />
+                        <p class="mb-0">Bạn có thể xem chi tiết đơn hàng tại mục Orders hoặc tiếp tục mua sắm.</p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                else if (Model.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">⚠ Thanh toán đã bị huỷ</h4>
+                        <p>Bạn đã huỷ giao dịch thanh toán. Đơn hàng vẫn đang chờ thanh toán.</p>
+                        <hr />
+                        <p class="mb-0">Vui lòng thử lại hoặc liên hệ hỗ trợ nếu có vấn đề.</p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                else if (Model.Status.Equals("Timeout", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">✕ Thanh toán bị timeout</h4>
+                        <p>Thời gian chờ thanh toán đã hết. Giao dịch không thể hoàn thành.</p>
+                        <hr />
+                        <p class="mb-0">Vui lòng thử thanh toán lại.</p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                else if (Model.Status.Equals("Error", StringComparison.OrdinalIgnoreCase))
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">✕ Lỗi hệ thống</h4>
+                        <p>Đã xảy ra lỗi trong quá trình xử lý thanh toán.</p>
+                        <hr />
+                        <p class="mb-0">Vui lòng thử lại hoặc liên hệ hỗ trợ khách hàng.</p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">ℹ Thông tin thanh toán</h4>
+                        <p>Trạng thái: <strong>@Model.Status</strong></p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            }
+
+            <!-- Payment Details Card -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Chi tiết giao dịch thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <th style="width: 40%;">Mã thanh toán (Payment ID):</th>
+                            <td><strong>@Model.PaymentId</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Mã đơn hàng (Order ID):</th>
+                            <td><strong>@Model.OrderId</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Số tiền thanh toán:</th>
+                            <td><strong class="text-danger">@String.Format("{0:N0}", (decimal)Model.Amount) VND</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Trạng thái:</th>
+                            <td>
+                                @if (Model.Status.Equals("Success", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <span class="badge bg-success">✓ @Model.Status</span>
+                                }
+                                else if (Model.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <span class="badge bg-warning">⚠ @Model.Status</span>
+                                }
+                                else if (Model.Status.Equals("Timeout", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <span class="badge bg-danger">✕ @Model.Status</span>
+                                }
+                                else if (Model.Status.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <span class="badge bg-secondary">⏱ @Model.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@Model.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-action="List" class="btn btn-secondary">
+                    <i class="bi bi-list"></i> Xem danh sách thanh toán
+                </a>
+                <a asp-controller="Order" asp-action="Index" class="btn btn-info">
+                    <i class="bi bi-receipt"></i> Xem đơn hàng
+                </a>
+                @if (Model.Status != null && !Model.Status.Equals("Success", StringComparison.OrdinalIgnoreCase) && !Model.Status.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+                {
+                    <form asp-action="CreatePaymentRequest" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <input type="hidden" name="amount" value="@Model.Amount" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Thử lại thanh toán
+                        </button>
+                    </form>
+                }
+                @if (Model.Status != null && !Model.Status.Equals("Success", StringComparison.OrdinalIgnoreCase) && !Model.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+                {
+                    <form asp-action="CancelPayment" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hủy thanh toán này?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="paymentId" value="@Model.PaymentId" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-circle"></i> Hủy thanh toán
+                        </button>
+                    </form>
+                }
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
+                    <i class="bi bi-house"></i> Trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert {
+        border-left: 4px solid;
+    }
+    .alert-success {
+        border-left-color: #28a745;
+    }
+    .alert-warning {
+        border-left-color: #ffc107;
+    }
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+    .alert-info {
+        border-left-color: #17a2b8;
+    }
+</style>

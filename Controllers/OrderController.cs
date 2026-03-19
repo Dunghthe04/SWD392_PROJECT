@@ -147,7 +147,9 @@ public class OrderController : Controller
             MenuItemId = item.MenuItemId,
             ItemName = item.ItemName,
             Quantity = item.Quantity,
+
             UnitPrice = (double)item.UnitPrice
+
         }).ToList();
 
         // Validate
