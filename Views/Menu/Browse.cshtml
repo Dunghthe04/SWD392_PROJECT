@@ -1,0 +1,237 @@
+@model List<SWD392_PROJECT.Models.Product>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Browse Menu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-6">
+                <i class="fas fa-utensils"></i> Browse Menu
+            </h1>
+            <p class="text-muted">Explore our delicious food options</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Checkout", "Order")" class="btn btn-lg btn-warning" id="checkoutBtn">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartCount" class="badge bg-danger">0</span>
+                Checkout
+            </a>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Search products..."
+                                   value="@ViewBag.SearchTerm">
+                        </div>
+                        <div class="col-md-4">
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                @if (ViewBag.Categories != null && ((IEnumerable<string>)ViewBag.Categories).Count() > 0)
+                                {
+                                    @foreach (var cat in (IEnumerable<string>)ViewBag.Categories)
+                                    {
+                                        <option value="@cat"
+                                                selected="@(ViewBag.SelectedCategory == cat ? "selected" : "")">
+                                            @cat
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Info -->
+    @if (ViewBag.ProductCount != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <small><strong>Debug:</strong> Found @ViewBag.ProductCount products</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Products Grid -->
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 product-card">
+                        <!-- Product Image -->
+                        <div class="product-img-wrap">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name"
+                                     onerror="this.style.display='none'">
+                            }
+                            else
+                            {
+                                <i class="fas fa-image product-img-placeholder"></i>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <span class="badge bg-info mb-2">@product.Category</span>
+                            <h5 class="card-title">@product.Name</h5>
+
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                <p class="card-text text-muted small">
+                                    @(product.Description.Length > 100
+                                                            ? product.Description.Substring(0, 100) + "..."
+                                                            : product.Description)
+                                </p>
+                            }
+
+                            <p class="small text-secondary mb-0">
+                                <i class="fas fa-clock"></i> @product.SellingTime
+                            </p>
+                        </div>
+
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-success mb-0">₫@product.Price.ToString("N0")</span>
+                                <div class="d-flex gap-1">
+                                    <a href="@Url.Action("Details", "Menu", new { id = product.ProductId })"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <button class="btn btn-sm btn-success"
+                                            onclick="addToCart(@product.ProductId, '@product.Name', @product.Price)">
+                                        <i class="fas fa-shopping-cart"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fas fa-inbox"></i>
+            <p class="mb-2">No products found.</p>
+            <small class="text-muted">
+                Please check that products have been inserted into the database.
+                <br />
+                <a href="@Url.Action("Debug", "Menu")" target="_blank" class="link-secondary">View Debug Info</a>
+            </small>
+        </div>
+    }
+</div>
+
+<style>
+    .product-card {
+        border: 1px solid #dee2e6;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+            transform: translateY(-2px);
+        }
+
+    .product-img-wrap {
+        height: 220px;
+        overflow: hidden;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .product-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .product-img-placeholder {
+        font-size: 2.5rem;
+        color: #ccc;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        updateCartCount();
+    });
+
+    function addToCart(productId, productName, price) {
+        console.log('Adding to cart:', { productId, productName, price });
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        console.log('Current cart:', cart);
+
+        const existingItem = cart.find(item => item.productId === productId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+            showNotification(`Added another "${productName}" to cart! Total: ${existingItem.quantity} items`);
+        } else {
+            cart.push({ productId: productId, quantity: 1 });
+            showNotification(`"${productName}" added to cart!`);
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        console.log('Cart saved to localStorage:', JSON.parse(localStorage.getItem('cart')));
+        updateCartCount();
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountBadge = document.getElementById('cartCount');
+        if (cartCountBadge) {
+            cartCountBadge.textContent = totalItems;
+            cartCountBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+        }
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) {
+            checkoutBtn.classList.toggle('disabled', totalItems === 0);
+        }
+    }
+
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top:20px; right:20px; z-index:9999; min-width:300px;';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+</script>

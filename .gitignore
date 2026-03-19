@@ -21,6 +21,8 @@ obj/
 # ASP.NET Core
 wwwroot/lib/
 wwwroot/dist/
+wwwroot/uploads/issues/*
+!wwwroot/uploads/issues/.gitkeep
 
 # Logs
 *.log

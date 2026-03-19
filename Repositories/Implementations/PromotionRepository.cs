@@ -24,7 +24,7 @@ namespace SWD392_PROJECT.Data.Repositories.Implementations
         }
 
         /// <summary>
-        /// Retrieve all promotions from the database
+        /// Retrieve all promotions from the database (excluding deleted)
         /// </summary>
         public async Task<List<Promotion>> FindAll()
         {
@@ -32,6 +32,7 @@ namespace SWD392_PROJECT.Data.Repositories.Implementations
             {
                 return await _context.Promotions
                     .AsNoTracking()
+                    .Where(p => p.Status != "Deleted")
                     .OrderByDescending(p => p.CreatedDate)
                     .ToListAsync();
             }

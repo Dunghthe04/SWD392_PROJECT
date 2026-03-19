@@ -2,12 +2,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using SWD392_PROJECT.Services.Interfaces;
 
 namespace SWD392_PROJECT.Controllers;
 
 [Route("[controller]")]
 public class AuthController : Controller
 {
+    private readonly IUserService _userService;
+
+    public AuthController(IUserService userService)
+    {
+        _userService = userService;
+    }
+
     [AllowAnonymous]
     [HttpGet("")]
     [HttpGet("Login")]
@@ -24,46 +32,58 @@ public class AuthController : Controller
 
     [HttpPost("Login")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(string role)
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(string username, string password)
     {
-        if (string.IsNullOrWhiteSpace(role))
+        // Validate inputs
+        if (string.IsNullOrWhiteSpace(username))
         {
-            ModelState.AddModelError("", "Please select a role.");
+            ModelState.AddModelError(nameof(username), "Username is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            ModelState.AddModelError(nameof(password), "Password is required.");
+        }
+
+        if (!ModelState.IsValid)
+        {
             return View();
         }
 
-        // Validate role
-        var validRoles = new[] { "Student", "CanteenStaff", "Manager" };
-        if (!validRoles.Contains(role))
+        // Get user by username
+        var user = await _userService.GetUserByUsernameAsync(username);
+
+        if (user == null)
         {
-            ModelState.AddModelError("", "Invalid role selected.");
+            ModelState.AddModelError("", "Invalid username or password.");
             return View();
         }
 
-        // Create claims based on role
+        // Check if user account is active
+        if (!user.IsActive)
+        {
+            ModelState.AddModelError("", "Your account has been deactivated.");
+            return View();
+        }
+
+        // Verify password
+        if (!_userService.VerifyPassword(password, user.PasswordHash))
+        {
+            ModelState.AddModelError("", "Invalid username or password.");
+            return View();
+        }
+
+        // Create claims from user record
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, $"User_{DateTime.Now.Ticks}"),
-            new Claim(ClaimTypes.Role, role),
-            new Claim("Role", role)
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim("Role", user.Role),
+            new Claim("UserId", user.UserId.ToString())
         };
-
-        // For demo purposes, assign specific IDs based on role
-        switch (role)
-        {
-            case "Student":
-                claims.Add(new Claim("UserId", "2001"));
-                claims.Add(new Claim("StaffId", "0")); // Not applicable for students
-                break;
-            case "CanteenStaff":
-                claims.Add(new Claim("UserId", "0")); // Not applicable for staff
-                claims.Add(new Claim("StaffId", "9001"));
-                break;
-            case "Manager":
-                claims.Add(new Claim("UserId", "0")); // Not applicable for managers
-                claims.Add(new Claim("StaffId", "9002"));
-                break;
-        }
 
         var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
         var authProperties = new AuthenticationProperties
@@ -75,7 +95,7 @@ public class AuthController : Controller
         await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
 
         // Redirect based on role
-        return role switch
+        return user.Role switch
         {
             "Student" => RedirectToAction("Index", "Order"),
             "CanteenStaff" => RedirectToAction("Index", "Order"),
@@ -96,6 +116,68 @@ public class AuthController : Controller
     [HttpGet("AccessDenied")]
     public IActionResult AccessDenied()
     {
+        return View();
+    }
+
+    [AllowAnonymous]
+    [HttpGet("Register")]
+    public IActionResult Register()
+    {
+        // If already logged in, redirect to home
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("Register")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(string username, string email, string password, string confirmPassword, string phone, string role)
+    {
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            ModelState.AddModelError(nameof(username), "Username is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ModelState.AddModelError(nameof(email), "Email is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            ModelState.AddModelError(nameof(password), "Password is required.");
+        }
+
+        if (password != confirmPassword)
+        {
+            ModelState.AddModelError(nameof(confirmPassword), "Passwords do not match.");
+        }
+
+        if (string.IsNullOrWhiteSpace(role))
+        {
+            ModelState.AddModelError(nameof(role), "Please select a role.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View();
+        }
+
+        // Register user
+        var (success, message) = await _userService.RegisterUserAsync(username, email, password, phone ?? string.Empty, role);
+
+        if (success)
+        {
+            TempData["SuccessMessage"] = message;
+            return RedirectToAction("Login");
+        }
+
+        ModelState.AddModelError("", message);
         return View();
     }
 }

@@ -1,0 +1,347 @@
+@model PlaceOrderViewModel
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Order Checkout</h2>
+            <hr />
+
+            <!-- Cart Status Debug -->
+            <div class="alert alert-info" id="debugAlert" style="display:none;">
+                <strong>Debug Info:</strong> <span id="debugMessage"></span>
+            </div>
+
+            <form id="checkoutForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Cart Items Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="cartLoadingSpinner" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading cart...</span>
+                            </div>
+                            <p>Loading your cart...</p>
+                        </div>
+                        <table class="table table-sm" id="cartTable" style="display:none;">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartItemsTableBody">
+                                <!-- Items populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Order Total -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Total Items: <span id="totalItems">0</span></h5>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h4>Total Price: <span id="totalPrice" class="text-primary">0.00</span> VND</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Payment Method</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCash" value="Cash" checked />
+                            <label class="form-check-label" for="paymentCash">
+                                Cash Payment
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCard" value="Card" />
+                            <label class="form-check-label" for="paymentCard">
+                                Card Payment
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Special Requests (Optional)</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea 
+                            class="form-control" 
+                            id="notes" 
+                            name="notes" 
+                            rows="3" 
+                            placeholder="Add any special requests or notes for your order...">@Model.Notes</textarea>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg" id="placeOrderBtn" disabled>
+                        <i class="fas fa-check"></i> Place Order
+                    </button>
+                    <a href="@Url.Action("Browse", "Menu")" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5>Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Status</small>
+                        <p id="orderStatus" class="mb-0"><span class="badge bg-warning">Pending</span></p>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Items</small>
+                        <p id="sidebarItemCount" class="mb-0"><strong>0 items</strong></p>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Total Amount</small>
+                        <p id="sidebarTotal" class="mb-0"><strong>0.00 VND</strong></p>
+                    </div>
+                    <hr />
+                    <div id="estimatedTime" class="alert alert-info" role="alert">
+                        <small>
+                            <i class="fas fa-clock"></i> Estimated delivery time: <strong>30 minutes</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log('=== Checkout Page Loaded ===');
+            // Load cart from sessionStorage
+            loadCart();
+
+            // Handle form submission
+            $('#checkoutForm').submit(function (e) {
+                e.preventDefault();
+                placeOrder();
+            });
+        });
+
+        function loadCart() {
+            console.log('=== loadCart() called ===');
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            console.log('Cart from localStorage:', cart);
+            showDebug(`Cart contains ${cart.length} items`);
+
+            if (cart.length === 0) {
+                console.log('Cart is empty');
+                $('#cartTable').hide();
+                $('#cartLoadingSpinner').html(`
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-inbox"></i>
+                        <p class="mb-2">Your cart is empty!</p>
+                        <a href="@Url.Action("Browse", "Menu")" class="btn btn-primary">Go Back to Menu</a>
+                    </div>
+                `);
+                $('#placeOrderBtn').prop('disabled', true);
+                return;
+            }
+
+            $('#cartLoadingSpinner').html('<p class="text-muted">Validating cart items...</p>');
+            validateAndDisplayCart(cart);
+        }
+
+        function validateAndDisplayCart(cartItems) {
+            console.log('=== validateAndDisplayCart() called ===');
+            console.log('Items to validate:', cartItems);
+            
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetOrderSummary", "Order")',
+                contentType: 'application/json',
+                data: JSON.stringify(cartItems),
+                headers: {
+                    'RequestVerificationToken': $('[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    console.log('✅ GetOrderSummary SUCCESS:', response);
+                    if (response.success) {
+                        displayCartItems(response.orderItems, response.totalPrice, response.itemCount);
+                        showDebug(`Successfully loaded ${response.itemCount} items`);
+                    } else {
+                        console.error('❌ GetOrderSummary returned success=false:', response.message);
+                        showError(response.message);
+                        $('#placeOrderBtn').prop('disabled', true);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('❌ GetOrderSummary AJAX ERROR:', {status, error, xhr});
+                    console.error('Response:', xhr.responseText);
+                    showError('Failed to validate cart: ' + error);
+                    showDebug(`Error: ${error} - ${xhr.responseText}`);
+                    $('#placeOrderBtn').prop('disabled', true);
+                }
+            });
+        }
+
+        function displayCartItems(items, totalPrice, itemCount) {
+            console.log('=== displayCartItems() called ===');
+            console.log('Items:', items);
+            console.log('Total Price:', totalPrice);
+            
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.itemName}</td>
+                        <td>${item.quantity}</td>
+                        <td>₫${item.unitPrice.toLocaleString('en-US')}</td>
+                        <td>₫${item.subTotal.toLocaleString('en-US')}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${item.menuItemId})">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            $('#cartItemsTableBody').html(html);
+            $('#cartLoadingSpinner').hide();
+            $('#cartTable').show();
+            
+            $('#totalItems').text(itemCount);
+            $('#totalPrice').text(totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2}));
+            $('#sidebarItemCount').html(`<strong>${itemCount} items</strong>`);
+            $('#sidebarTotal').html(`<strong>₫${totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>`);
+            $('#placeOrderBtn').prop('disabled', false);
+            
+            console.log('✅ Cart displayed successfully');
+        }
+
+        function placeOrder() {
+            console.log('=== placeOrder() called ===');
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            console.log('📦 Cart from localStorage:', cart);
+            console.log('📦 Cart length:', cart.length);
+            console.log('📦 Cart items:', JSON.stringify(cart, null, 2));
+
+            const paymentMethod = $('input[name="paymentMethod"]:checked').val();
+            const notes = $('#notes').val();
+
+            if (cart.length === 0) {
+                console.error('❌ CART IS EMPTY - Cannot proceed');
+                showError('Cart is empty - Please go back and add items');
+                return;
+            }
+
+            const formData = {
+                cartItems: cart,
+                paymentMethod: paymentMethod,
+                notes: notes
+            };
+
+            console.log('📤 FormData to send:', JSON.stringify(formData, null, 2));
+            showDebug(`Sending ${cart.length} items to server...`);
+            $('#placeOrderBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("PlaceOrder", "Order")',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                headers: {
+                    'RequestVerificationToken': $('[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    console.log('✅ PlaceOrder SUCCESS:', response);
+                    if (response.success) {
+                        showSuccess(`Order #${response.orderId} placed successfully!`);
+                        localStorage.removeItem('cart');
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Order")';
+                        }, 2000);
+                    } else {
+                        console.error('❌ PlaceOrder returned success=false:', response.message);
+                        showError(response.message);
+                        $('#placeOrderBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Place Order');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('❌ PlaceOrder AJAX ERROR:', {status, error, xhr});
+                    console.error('Response:', xhr.responseText);
+                    showError('Failed to place order: ' + error);
+                    $('#placeOrderBtn').prop('disabled', false).html('<i class="fas fa-check"></i> Place Order');
+                }
+            });
+        }
+
+        function removeFromCart(productId) {
+            console.log('🗑️ Removing productId:', productId);
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            console.log('Before removal:', cart);
+
+            const updatedCart = cart.filter(item => item.productId !== productId);
+            console.log('After removal:', updatedCart);
+
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
+            showSuccess(`Item removed from cart`);
+            loadCart(); // Reload to update display and recalculate totals
+        }
+
+        function showError(message) {
+            console.error('SHOWING ERROR:', message);
+            const alert = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $(alert).prependTo('.container');
+        }
+
+        function showSuccess(message) {
+            console.log('SHOWING SUCCESS:', message);
+            const alert = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $(alert).prependTo('.container');
+        }
+
+        function showDebug(message) {
+            console.log('DEBUG:', message);
+            $('#debugAlert').show();
+            $('#debugMessage').text(message);
+        }
+    </script>
+}

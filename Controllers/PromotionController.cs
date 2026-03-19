@@ -118,5 +118,42 @@ namespace SWD392_PROJECT.Controllers
                 return RedirectToAction("GetAllPromotions");
             }
         }
+
+        /// <summary>
+        /// Delete Promotion - Manager Only
+        /// HTTP POST /Promotion/Delete/{promotionId}
+        /// Only managers can delete promotions
+        /// </summary>
+        [HttpPost("Delete/{promotionId}")]
+        [Authorize(Roles = "Manager")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePromotion(int promotionId)
+        {
+            try
+            {
+                _logger.LogInformation($"Manager attempting to delete promotion ID: {promotionId}");
+
+                // Call service method to delete promotion
+                var result = await _promotionService.DeletePromotionAsync(promotionId);
+
+                if (!result.Success)
+                {
+                    _logger.LogWarning($"Failed to delete promotion. Message: {result.Message}");
+                    TempData["ErrorMessage"] = result.Message ?? "Unable to delete promotion.";
+                    return RedirectToAction("GetPromotionDetail", new { promotionId });
+                }
+
+                // Success
+                _logger.LogInformation($"Successfully deleted promotion ID: {promotionId}");
+                TempData["SuccessMessage"] = "Promotion deleted successfully.";
+                return RedirectToAction("GetAllPromotions");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting promotion ID: {promotionId}");
+                TempData["ErrorMessage"] = "An error occurred while deleting the promotion. Please try again.";
+                return RedirectToAction("GetPromotionDetail", new { promotionId });
+            }
+        }
     }
 }
