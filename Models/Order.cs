@@ -166,6 +166,6 @@ public class Order
 
     public void RecalculateTotal()
     {
-        TotalPrice = (decimal)Items.Sum(item => item.LineTotal);
+        TotalPrice = Items.Sum(item => item.LineTotal);
     }
 }

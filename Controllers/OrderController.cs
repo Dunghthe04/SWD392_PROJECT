@@ -162,7 +162,7 @@ public class OrderController : Controller
             ItemName = item.ItemName,
             Quantity = item.Quantity,
 
-            UnitPrice = (double)item.UnitPrice
+            UnitPrice = item.UnitPrice
 
         }).ToList();
 
@@ -248,9 +248,7 @@ public class OrderController : Controller
         }
     }
 
-    /// <summary>
-    /// M11-M12: Get order summary (check stock availability)
-    /// </summary>
+
     [HttpPost]
     [Route("GetOrderSummary")]
     [AllowAnonymous]
@@ -265,7 +263,7 @@ public class OrderController : Controller
             }
 
             var orderItems = new List<OrderItem>();
-            double totalPrice = 0;
+            decimal totalPrice = 0;
             var errors = new List<string>();
 
             // M11-M12: Check stock for each item
@@ -324,9 +322,7 @@ public class OrderController : Controller
         }
     }
 
-    /// <summary>
-    /// M13-M17: Place order (Create order, create items, decrement stock, process payment)
-    /// </summary>
+  
     [HttpPost]
     [Route("PlaceOrder")]
     [ValidateAntiForgeryToken]
@@ -397,18 +393,34 @@ public class OrderController : Controller
                 return Json(new { success = false, message = $"Failed to create order: {ex.InnerException?.Message ?? ex.Message}" });
             }
 
-            // Step 4 (M14b): Calculate total price
+            // Step 4 (M14b): Create OrderItems and calculate total price
             decimal totalPrice = 0;
+            var orderItems = new List<OrderItem>();
             try
             {
                 foreach (var item in model.CartItems)
                 {
                     var product = products[item.ProductId];
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.OrderId,
+                        MenuItemId = product.ProductId,
+                        ItemName = product.Name,
+                        Quantity = item.Quantity,
+                        UnitPrice = product.Price
+                    };
+
+                    orderItems.Add(orderItem);
                     totalPrice += (decimal)(item.Quantity * product.Price);
-                    System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Item: {product.Name}, Qty={item.Quantity}, Price={product.Price}");
+                    System.Diagnostics.Debug.WriteLine($"[PlaceOrder] OrderItem created: ProductId={product.ProductId}, Qty={item.Quantity}, Price={product.Price}");
                 }
 
                 System.Diagnostics.Debug.WriteLine($"[PlaceOrder] Total Price Calculated: {totalPrice}");
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] OrderItems count: {orderItems.Count}");
+
+                // Save all OrderItems to database in one batch
+                _orderRepository.CreateOrderItems(orderItems);
+                System.Diagnostics.Debug.WriteLine($"[PlaceOrder] All OrderItems saved to database");
 
                 // Update order with total price and set to Paid status using new method
                 _orderRepository.UpdateOrderTotal(order.OrderId, totalPrice, "Paid");
@@ -444,6 +456,64 @@ public class OrderController : Controller
         catch (Exception ex)
         {
             return Json(new { success = false, message = $"Error: {ex.Message}" });
+        }
+    }
+
+    
+    [HttpGet]
+    [Route("MyOrders")]
+    [AllowAnonymous]
+    public IActionResult MyOrders()
+    {
+        try
+        {
+            var userId = User.FindFirst("UserId")?.Value ?? "0";
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] User ID: {userId}");
+
+            if (!int.TryParse(userId, out int userIdInt))
+            {
+                return Json(new { success = false, message = "Invalid user" });
+            }
+
+            // Get all orders - ReadOrderList handles the Include
+            var allOrders = _orderService.ReadOrderList();
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] Total orders retrieved: {allOrders?.Count ?? 0}");
+
+            if (allOrders == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MyOrders] ReadOrderList returned NULL!");
+                var errorModel = new OrderListViewModel
+                {
+                    IsError = true,
+                    Message = "Error loading orders - database query failed"
+                };
+                return View("Index", errorModel);
+            }
+
+            // Filter to user's orders
+            var myOrders = allOrders.Where(o => o.StudentId == userIdInt).ToList();
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] Filtered to {myOrders.Count} orders for student {userIdInt}");
+
+            var model = new OrderListViewModel
+            {
+                Orders = myOrders,
+                Message = myOrders.Count == 0 ? "You have no orders yet." : null
+            };
+
+            return View("Index", model);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] Exception: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] Inner exception: {ex.InnerException?.Message}");
+            System.Diagnostics.Debug.WriteLine($"[MyOrders] Stack trace: {ex.StackTrace}");
+
+            var model = new OrderListViewModel
+            {
+                IsError = true,
+                Message = $"Error loading orders: {ex.InnerException?.Message ?? ex.Message}"
+            };
+            return View("Index", model);
         }
     }
 }

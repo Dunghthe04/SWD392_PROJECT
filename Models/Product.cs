@@ -18,7 +18,7 @@ public class Product
     /// <summary>
     /// Product price
     /// </summary>
-    public double Price { get; set; }
+    public decimal Price { get; set; }
 
     /// <summary>
     /// Product category (e.g., "Breakfast", "Lunch", "Snacks", "Drinks")

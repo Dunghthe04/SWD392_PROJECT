@@ -21,7 +21,20 @@ public class ProductService : IProductService
     /// </summary>
     public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        return await _productRepository.GetAllProductsAsync();
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("[ProductService] Getting all products");
+            var products = await _productRepository.GetAllProductsAsync();
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Retrieved {products.Count()} products");
+            return products;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Exception in GetAllProductsAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Inner exception: {ex.InnerException?.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     /// <summary>
@@ -29,7 +42,19 @@ public class ProductService : IProductService
     /// </summary>
     public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(string category)
     {
-        return await _productRepository.GetProductsByCategoryAsync(category);
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Getting products for category: {category}");
+            var products = await _productRepository.GetProductsByCategoryAsync(category);
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Retrieved {products.Count()} products for category {category}");
+            return products;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Exception in GetProductsByCategoryAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     /// <summary>
@@ -45,7 +70,19 @@ public class ProductService : IProductService
     /// </summary>
     public async Task<IEnumerable<string>> GetCategoriesAsync()
     {
-        return await _productRepository.GetCategoriesAsync();
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("[ProductService] Getting all categories");
+            var categories = await _productRepository.GetCategoriesAsync();
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Retrieved {categories.Count()} categories");
+            return categories;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Exception in GetCategoriesAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     /// <summary>
@@ -56,6 +93,18 @@ public class ProductService : IProductService
         if (string.IsNullOrWhiteSpace(searchTerm))
             return await GetAllProductsAsync();
 
-        return await _productRepository.SearchProductsAsync(searchTerm);
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Searching products for: {searchTerm}");
+            var products = await _productRepository.SearchProductsAsync(searchTerm);
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Found {products.Count()} products for search: {searchTerm}");
+            return products;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Exception in SearchProductsAsync: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ProductService] Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 }
