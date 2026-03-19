@@ -9,7 +9,7 @@ public class CreateProductViewModel
 
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
-    public decimal Price { get; set; }
+    public double Price { get; set; }
 
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be a positive number.")]

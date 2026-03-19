@@ -22,14 +22,9 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Promotion> Promotions { get; set; }
-<<<<<<< HEAD
     public DbSet<Payment> Payments { get; set; }
-=======
     public DbSet<Stall> Stalls { get; set; }
-    public DbSet<Payment> Payments { get; set; }
-    public DbSet<Product> Products { get; set; }
     public DbSet<StallProduct> StallProducts { get; set; }
->>>>>>> 8de0a11 ( Dung commit)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -84,10 +79,8 @@ public class AppDbContext : DbContext
                 .WithOne(i => i.Order)
                 .HasForeignKey(i => i.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
-<<<<<<< HEAD
 
             entity.HasIndex(o => o.Status).HasDatabaseName("IX_Order_Status");
-=======
                 
             // Relationship: Order belongs to a Stall (optional)
             entity.HasOne<Stall>()
@@ -140,7 +133,6 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(sp => sp.StallId)
                 .OnDelete(DeleteBehavior.Cascade);
->>>>>>> 8de0a11 ( Dung commit)
         });
 
         // Configure OrderItem entity
