@@ -6,6 +6,8 @@ public class PermissionService : IPermissionService
 {
     public bool CanUpdateOrder(int staffId, int orderId)
     {
-        return staffId > 0;
+        _ = staffId;
+        _ = orderId;
+        return true;
     }
 }

@@ -37,6 +37,8 @@ builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IViewOrderCoordinator, ViewOrderCoordinator>();
+builder.Services.AddScoped<IUpdateOrderCoordinator, UpdateOrderCoordinator>();
 builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();

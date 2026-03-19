@@ -19,6 +19,18 @@ public class ValidationService : IValidationService
             return false;
         }
 
+        if (updatedItems.Any(item => string.IsNullOrWhiteSpace(item.ItemName)))
+        {
+            errorMessage = "Item name is required for all order items.";
+            return false;
+        }
+
+        if (updatedItems.Any(item => item.UnitPrice <= 0))
+        {
+            errorMessage = "Each item unit price must be greater than 0.";
+            return false;
+        }
+
         if (notes.Length > 500)
         {
             errorMessage = "Notes cannot exceed 500 characters.";

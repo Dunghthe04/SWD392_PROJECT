@@ -77,13 +77,26 @@ public class OrderRepository : IOrderRepository
             }
 
             // Update order details
-            existingOrder.UpdateDetails(updatedOrder.Items, updatedOrder.Notes);
+            existingOrder.Notes = updatedOrder.Notes;
+            foreach (var updatedItem in updatedOrder.Items)
+            {
+                var existingItem = existingOrder.Items.FirstOrDefault(i => i.MenuItemId == updatedItem.MenuItemId);
+                if (existingItem is null)
+                {
+                    continue;
+                }
+
+                existingItem.ItemName = updatedItem.ItemName;
+                existingItem.Quantity = updatedItem.Quantity;
+                existingItem.UnitPrice = updatedItem.UnitPrice;
+            }
+
+            existingOrder.TotalPrice = existingOrder.Items.Sum(i => i.LineTotal);
             existingOrder.Status = updatedOrder.Status;
             existingOrder.IsLocked = updatedOrder.IsLocked;
             existingOrder.Version += 1;
             existingOrder.LastUpdatedAt = DateTime.UtcNow;
 
-            _context.Orders.Update(existingOrder);
             _context.SaveChanges();
             return true;
         }
