@@ -43,11 +43,50 @@ public class Order
             Version = 1,
             CreatedAt = now,
             LastUpdatedAt = now,
-            Items = targetItems.Select(item => item.Clone()).ToList()
+            Items = new List<OrderItem>(targetItems) // Use items directly without cloning
         };
 
-        order.RecalculateTotal();
+        // Only calculate total if items are provided
+        if (targetItems.Count > 0)
+        {
+            order.RecalculateTotal();
+        }
+
         return order;
+    }
+
+    public static Order CreateOrder(string targetStudentName, double targetTotalPrice)
+    {
+        var now = DateTime.UtcNow;
+        return new Order
+        {
+            StudentName = targetStudentName,
+            TotalPrice = Convert.ToDecimal(targetTotalPrice),
+            OrderTime = now,
+            Status = "Pending",
+            CreatedAt = now,
+            LastUpdatedAt = now
+        };
+    }
+
+    public static Order CreateOrder(int targetStudentId, string initialNotes)
+    {
+        var now = DateTime.UtcNow;
+        return new Order
+        {
+            StudentId = targetStudentId,
+            Notes = initialNotes,
+            Status = "Pending",
+            OrderTime = now,
+            CreatedAt = now,
+            LastUpdatedAt = now,
+            Version = 1
+        };
+    }
+
+    public static List<Order> ReadOrderList(IEnumerable<Order> orders)
+    {
+        return orders.ToList();
     }
 
     public string ReadOrder()
@@ -63,6 +102,34 @@ public class Order
         RecalculateTotal();
     }
 
+    public void UpdateOrderStatus(string newStatus)
+    {
+        if (string.IsNullOrWhiteSpace(newStatus))
+        {
+            return;
+        }
+
+        Status = newStatus;
+        LastUpdatedAt = DateTime.UtcNow;
+    }
+
+    public string UpdateOrder(string newNotes)
+    {
+        if (!string.IsNullOrWhiteSpace(newNotes))
+        {
+            Notes = newNotes;
+        }
+
+        LastUpdatedAt = DateTime.UtcNow;
+        return "Updated";
+    }
+
+    public void DeleteOrder()
+    {
+        Status = "Cancelled";
+        LastUpdatedAt = DateTime.UtcNow;
+    }
+
     public int GetStudentId()
     {
         return StudentId;
@@ -70,10 +137,14 @@ public class Order
 
     public bool IsUpdatable()
     {
-        return Status != "Processing"
-            && Status != "Completed"
-            && Status != "Cancelled"
-            && !IsLocked;
+        return CheckUpdatableStatus();
+    }
+
+    public bool CheckUpdatableStatus()
+    {
+        var isCompleted = string.Equals(Status, "Completed", StringComparison.OrdinalIgnoreCase);
+        var isCancelled = string.Equals(Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
+        return !isCompleted && !isCancelled && !IsLocked;
     }
 
     public Order Clone()
@@ -95,8 +166,8 @@ public class Order
         };
     }
 
-    private void RecalculateTotal()
+    public void RecalculateTotal()
     {
-        TotalPrice = (decimal)Items.Sum(item => item.LineTotal);
+        TotalPrice = Items.Sum(item => item.LineTotal);
     }
 }

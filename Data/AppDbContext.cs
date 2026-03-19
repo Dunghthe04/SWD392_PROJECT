@@ -51,7 +51,7 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(p => p.ProductId);
             entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
-            entity.Property(p => p.Price).IsRequired();
+            entity.Property(p => p.Price).IsRequired().HasPrecision(18, 2);
             entity.Property(p => p.Category).HasMaxLength(100).IsRequired();
             entity.Property(p => p.SellingTime).HasMaxLength(255).IsRequired();
             entity.Property(p => p.ImageUrl).HasMaxLength(500);
@@ -71,9 +71,10 @@ public class AppDbContext : DbContext
             entity.Property(o => o.Notes).HasMaxLength(1000);
             entity.Property(o => o.TotalPrice).HasPrecision(18, 2);
 
+            // Relationship: Order has many OrderItems
             entity.HasMany(o => o.Items)
                 .WithOne()
-                .HasForeignKey("OrderId")
+                .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany<Issue>()
@@ -139,10 +140,23 @@ public class AppDbContext : DbContext
         // Configure OrderItem entity
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(oi => new { oi.OrderId, oi.MenuItemId });
+            entity.HasKey(oi => oi.OrderItemId);
+
+            // Explicitly mark OrderItemId as identity (auto-generated)
+            entity.Property(oi => oi.OrderItemId)
+                .UseIdentityColumn();
+
+            entity.Property(oi => oi.OrderId).IsRequired();
+            entity.Property(oi => oi.MenuItemId).IsRequired();
             entity.Property(oi => oi.ItemName).HasMaxLength(255).IsRequired();
             entity.Property(oi => oi.Quantity).IsRequired();
-            entity.Property(oi => oi.UnitPrice).IsRequired();
+            entity.Property(oi => oi.UnitPrice).IsRequired().HasPrecision(18, 2);
+
+            // Foreign key relationship
+            entity.HasOne<Order>()
+                .WithMany(o => o.Items)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Configure Issue entity

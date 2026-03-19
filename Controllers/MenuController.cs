@@ -26,18 +26,24 @@ public class MenuController : Controller
 
             if (!string.IsNullOrEmpty(search))
             {
+                System.Diagnostics.Debug.WriteLine($"[Browse] Searching for: {search}");
                 products = await _productService.SearchProductsAsync(search);
             }
             else if (!string.IsNullOrEmpty(category))
             {
+                System.Diagnostics.Debug.WriteLine($"[Browse] Getting products by category: {category}");
                 products = await _productService.GetProductsByCategoryAsync(category);
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine($"[Browse] Getting all products");
                 products = await _productService.GetAllProductsAsync();
             }
 
+            System.Diagnostics.Debug.WriteLine($"[Browse] Products count: {products.Count()}");
+
             var categories = await _productService.GetCategoriesAsync();
+            System.Diagnostics.Debug.WriteLine($"[Browse] Categories count: {categories.Count()}");
 
             ViewBag.Categories = categories;
             ViewBag.SelectedCategory = category;
@@ -48,8 +54,12 @@ public class MenuController : Controller
         }
         catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[Browse] Exception: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Browse] Inner exception: {ex.InnerException?.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Browse] Stack trace: {ex.StackTrace}");
+
             // Log exception here
-            TempData["ErrorMessage"] = $"Error loading menu items: {ex.Message}";
+            TempData["ErrorMessage"] = $"Error loading menu items: {ex.InnerException?.Message ?? ex.Message}";
             return View(new List<Models.Product>());
         }
     }

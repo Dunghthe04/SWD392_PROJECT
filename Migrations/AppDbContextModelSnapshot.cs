@@ -183,6 +183,11 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<int>("MenuItemId")
                         .HasColumnType("int");
+                    b.Property<int>("OrderItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"));
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -194,6 +199,20 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
+                    b.Property<int>("MenuItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("OrderItemId");
 
                     b.HasKey("OrderId", "MenuItemId");
 
@@ -262,11 +281,17 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SellingTime")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
