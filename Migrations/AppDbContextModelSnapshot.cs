@@ -141,6 +141,9 @@ namespace SWD392_PROJECT.Migrations
                     b.Property<DateTime>("OrderTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("StallId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -165,6 +168,8 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasKey("OrderId");
 
+                    b.HasIndex("StallId");
+
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Order_Status");
 
@@ -173,6 +178,11 @@ namespace SWD392_PROJECT.Migrations
 
             modelBuilder.Entity("SWD392_PROJECT.Models.OrderItem", b =>
                 {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MenuItemId")
+                        .HasColumnType("int");
                     b.Property<int>("OrderItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
@@ -184,6 +194,11 @@ namespace SWD392_PROJECT.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("float");
                     b.Property<int>("MenuItemId")
                         .HasColumnType("int");
 
@@ -199,7 +214,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasKey("OrderItemId");
 
-                    b.HasIndex("OrderId");
+                    b.HasKey("OrderId", "MenuItemId");
 
                     b.ToTable("OrderItems");
                 });
@@ -220,10 +235,12 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("PaymentId");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Payments");
                 });
@@ -262,6 +279,8 @@ namespace SWD392_PROJECT.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -338,6 +357,50 @@ namespace SWD392_PROJECT.Migrations
                         .HasDatabaseName("IX_Promotion_Status");
 
                     b.ToTable("Promotions");
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.Stall", b =>
+                {
+                    b.Property<int>("StallId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StallId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("StallId");
+
+                    b.ToTable("Stalls");
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.StallProduct", b =>
+                {
+                    b.Property<int>("StallProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StallProductId"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StallId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StallProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("StallId");
+
+                    b.ToTable("StallProducts");
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.User", b =>
@@ -423,6 +486,14 @@ namespace SWD392_PROJECT.Migrations
                     b.Navigation("Issue");
                 });
 
+            modelBuilder.Entity("SWD392_PROJECT.Models.Order", b =>
+                {
+                    b.HasOne("SWD392_PROJECT.Models.Stall", null)
+                        .WithMany()
+                        .HasForeignKey("StallId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
             modelBuilder.Entity("SWD392_PROJECT.Models.OrderItem", b =>
                 {
                     b.HasOne("SWD392_PROJECT.Models.Order", null)
@@ -430,6 +501,34 @@ namespace SWD392_PROJECT.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.Payment", b =>
+                {
+                    b.HasOne("SWD392_PROJECT.Models.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SWD392_PROJECT.Models.StallProduct", b =>
+                {
+                    b.HasOne("SWD392_PROJECT.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SWD392_PROJECT.Models.Stall", "Stall")
+                        .WithMany()
+                        .HasForeignKey("StallId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Stall");
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>

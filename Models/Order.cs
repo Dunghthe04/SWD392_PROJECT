@@ -13,6 +13,8 @@ public class Order
     public decimal TotalPrice { get; set; }
 
     public string Status { get; set; } = "Pending";
+    
+    public int? StallId { get; set; } 
 
     public string Notes { get; set; } = string.Empty;
 

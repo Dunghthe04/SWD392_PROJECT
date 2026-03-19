@@ -49,6 +49,25 @@ public class Product
 
    
     public DateTime? UpdatedAt { get; set; }
+    // UML Method: +setProductInfo(productData)
+    public void SetProductInfo(CreateProductViewModel productData)
+    {
+        Name = productData.Name;
+        Price = productData.Price;
+        Category = productData.Category;
+        SellingTime = productData.SellingTime;
+
+        if (productData.Quantity > 0)
+            IsAvailable = true;
+        else
+            IsAvailable = false;
+    }
+
+    // UML Method: +createProduct()
+    public void CreateProduct()
+    {
+        // Hàm đại diện theo yêu cầu UML Pseudocode. 
+        // Về bản chất EF Core sẽ lưu bằng lệnh Add() ở DBContext.
 
   
     public string ReadProduct()

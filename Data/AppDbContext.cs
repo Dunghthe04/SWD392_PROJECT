@@ -23,6 +23,8 @@ public class AppDbContext : DbContext
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Promotion> Promotions { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<Stall> Stalls { get; set; }
+    public DbSet<StallProduct> StallProducts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,6 +83,58 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(o => o.Status).HasDatabaseName("IX_Order_Status");
+                
+            // Relationship: Order belongs to a Stall (optional)
+            entity.HasOne<Stall>()
+                .WithMany()
+                .HasForeignKey(o => o.StallId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Configure Stall entity
+        modelBuilder.Entity<Stall>(entity =>
+        {
+            entity.HasKey(s => s.StallId);
+            entity.Property(s => s.Name).HasMaxLength(255).IsRequired();
+        });
+
+        // Configure Payment entity
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(p => p.PaymentId);
+            entity.Property(p => p.OrderId).IsRequired();
+            entity.Property(p => p.Amount).IsRequired();
+            entity.Property(p => p.Status).HasMaxLength(50);
+            
+            // Relationship: Payment belongs to Order
+            entity.HasOne<Order>()
+                .WithMany()
+                .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure Product entity
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(p => p.ProductId);
+            entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
+            entity.Property(p => p.Price).IsRequired();
+        });
+
+        // Configure StallProduct entity
+        modelBuilder.Entity<StallProduct>(entity =>
+        {
+            entity.HasKey(sp => sp.StallProductId);
+            
+            entity.HasOne(sp => sp.Product)
+                .WithMany()
+                .HasForeignKey(sp => sp.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(sp => sp.Stall)
+                .WithMany()
+                .HasForeignKey(sp => sp.StallId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Configure OrderItem entity
@@ -166,8 +220,6 @@ public class AppDbContext : DbContext
             entity.HasIndex(p => p.Status).HasDatabaseName("IX_Promotion_Status");
             entity.HasIndex(p => p.ExpiryDate).HasDatabaseName("IX_Promotion_ExpiryDate");
         });
-        modelBuilder.Entity<Payment>()
-                .Property(p => p.Amount)
-                .HasColumnType("real");
+       
     }
 }

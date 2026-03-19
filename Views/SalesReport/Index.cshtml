@@ -1,0 +1,131 @@
+@model SWD392_PROJECT.Models.SalesReportViewModel
+@{
+    ViewData["Title"] = "Sales Report";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Campus Food System - Sales Report</h2>
+
+    <!-- Vùng hiển thị lỗi (Exceptions E1, E2) -->
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @Model.ErrorMessage
+        </div>
+    }
+
+    <!-- Form Chọn Tiêu chí Báo Cáo (Boundary Filter) -->
+    <div class="card p-4 mb-4 shadow-sm">
+        <form id="reportForm" asp-controller="SalesReport" asp-action="Index" method="post">
+            <div class="row align-items-end">
+                <!-- Dropdown thời gian -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Select Time Period:</label>
+                    <select class="form-select" asp-for="SelectedTimeRange">
+                        <option value="Daily">Daily Report</option>
+                        <option value="Weekly">Weekly Report</option>
+                        <option value="Monthly">Monthly Report</option>
+                    </select>
+                </div>
+                
+                <!-- Dropdown lọc theo Stall -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Filter by Stall (Optional):</label>
+                    <select class="form-select" asp-for="SelectedStallId">
+                        <option value="">-- All Stalls --</option>
+                        @foreach (var stall in Model.AvailableStalls)
+                        {
+                            <option value="@stall.StallId">@stall.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Nút Submit Yêu cầu -->
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" name="actionType" value="generate" asp-action="Index" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-file-earmark-bar-graph"></i> View Report
+                    </button>
+                    <button type="submit" asp-action="Export" class="btn btn-success">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vùng hiển thị Kết quả Báo Cáo -->
+    @if (Model.TotalOrders > 0)
+    {
+        <h4 class="mb-3 mt-4">Detailed Orders</h4>
+        <div class="table-responsive mb-4 shadow-sm border rounded">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Stall</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.ReportDetails)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@item.OrderId</td>
+                            <td>@item.StallName</td>
+                            <td>@item.OrderDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <span class="badge bg-success">@item.Status</span>
+                            </td>
+                            <td class="text-end fw-bold text-success">$@item.Amount.ToString("0.00")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="mb-3">Report Summary</h4>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card bg-info text-white text-center h-100 shadow-sm border-0">
+                    <div class="card-body py-4">
+                        <h5 class="card-title">Completed Orders</h5>
+                        <h1 class="display-4 fw-bold">@Model.TotalOrders</h1>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <div class="card bg-success text-white text-center h-100 shadow-sm border-0">
+                    <div class="card-body py-4">
+                        <h5 class="card-title">Total Revenue</h5>
+                        <h1 class="display-4 fw-bold">$@Model.TotalRevenue.ToString("0.00")</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Use Case A1, A2: Auto-refresh Report when changing Combobox
+        function autoRefresh() {
+            let form = document.getElementById('reportForm');
+            
+            // Chèn hidden input báo hiệu đây là luồng Refresh
+            let actionType = document.createElement('input');
+            actionType.type = 'hidden';
+            actionType.name = 'actionType';
+            actionType.value = 'refresh';
+            form.appendChild(actionType);
+            
+            form.submit();
+        }
+
+        // Bắt sự kiện người quản lý chọn mốc thời gian / Stall mới
+        document.getElementById('SelectedTimeRange').addEventListener('change', autoRefresh);
+        document.getElementById('SelectedStallId').addEventListener('change', autoRefresh);
+    </script>
+}
