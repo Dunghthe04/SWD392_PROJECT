@@ -82,7 +82,7 @@ public class OrderController : Controller
 
         if (!order.IsUpdatable())
         {
-            TempData["OrderMessage"] = "This order cannot be updated because it is already processed, cancelled, or locked.";
+            TempData["OrderMessage"] = "This order cannot be updated when status is Completed/Cancelled or when it is locked.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -92,11 +92,17 @@ public class OrderController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Route("Edit")]
-    public IActionResult Edit(EditOrderViewModel model, string submitAction)
+    [Route("Edit/{id?}")]
+    public IActionResult Edit(EditOrderViewModel model, string submitAction, int? id = null)
     {
         if (!_staffContext.IsAuthenticated || !_staffContext.HasOrderManagementPermission)
         {
             return Forbid();
+        }
+
+        if (id.HasValue && model.OrderId == 0)
+        {
+            model.OrderId = id.Value;
         }
 
         if (string.Equals(submitAction, "cancel", StringComparison.OrdinalIgnoreCase))
@@ -120,10 +126,18 @@ public class OrderController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        var allowedStatuses = new[] { "Pending", "Processing", "Completed", "Cancelled" };
+        if (!allowedStatuses.Contains(model.Status))
+        {
+            var invalidStatusModel = EditOrderViewModel.FromOrder(order);
+            invalidStatusModel.Message = "Invalid order status.";
+            return View(invalidStatusModel);
+        }
+
         if (!order.IsUpdatable())
         {
             var notUpdatableModel = EditOrderViewModel.FromOrder(order);
-            notUpdatableModel.Message = "This order cannot be updated because it is already processed, cancelled, or locked.";
+            notUpdatableModel.Message = "This order cannot be updated when status is Completed/Cancelled or when it is locked.";
             return View(notUpdatableModel);
         }
 
@@ -158,7 +172,20 @@ public class OrderController : Controller
             return View(conflictModel);
         }
 
-        order.UpdateDetails(updatedItems, model.Notes);
+        order.Notes = model.Notes;
+        order.Status = model.Status;
+        foreach (var updatedItem in updatedItems)
+        {
+            var existingItem = order.Items.FirstOrDefault(i => i.MenuItemId == updatedItem.MenuItemId);
+            if (existingItem is null)
+            {
+                continue;
+            }
+
+            existingItem.ItemName = updatedItem.ItemName;
+            existingItem.Quantity = updatedItem.Quantity;
+            existingItem.UnitPrice = updatedItem.UnitPrice;
+        }
 
         var saved = _orderService.Save(order, model.Version);
         if (!saved)
