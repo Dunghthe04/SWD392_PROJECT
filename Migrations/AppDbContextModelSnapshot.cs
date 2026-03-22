@@ -46,7 +46,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasKey("AuditLogId");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>
@@ -84,7 +84,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Issues");
+                    b.ToTable("Issues", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Notification", b =>
@@ -113,7 +113,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasIndex("IssueId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Order", b =>
@@ -173,7 +173,7 @@ namespace SWD392_PROJECT.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Order_Status");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.OrderItem", b =>
@@ -183,11 +183,6 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<int>("MenuItemId")
                         .HasColumnType("int");
-                    b.Property<int>("OrderItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"));
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -199,24 +194,10 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
-                    b.Property<int>("MenuItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("OrderItemId");
 
                     b.HasKey("OrderId", "MenuItemId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Payment", b =>
@@ -242,7 +223,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Product", b =>
@@ -281,17 +262,11 @@ namespace SWD392_PROJECT.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SellingTime")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("StockQuantity")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -304,7 +279,7 @@ namespace SWD392_PROJECT.Migrations
                     b.HasIndex("IsAvailable")
                         .HasDatabaseName("IX_Product_IsAvailable");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Promotion", b =>
@@ -356,7 +331,7 @@ namespace SWD392_PROJECT.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Promotion_Status");
 
-                    b.ToTable("Promotions");
+                    b.ToTable("Promotions", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Stall", b =>
@@ -374,7 +349,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasKey("StallId");
 
-                    b.ToTable("Stalls");
+                    b.ToTable("Stalls", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.StallProduct", b =>
@@ -400,7 +375,7 @@ namespace SWD392_PROJECT.Migrations
 
                     b.HasIndex("StallId");
 
-                    b.ToTable("StallProducts");
+                    b.ToTable("StallProducts", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.User", b =>
@@ -461,7 +436,7 @@ namespace SWD392_PROJECT.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_User_Username");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("SWD392_PROJECT.Models.Issue", b =>

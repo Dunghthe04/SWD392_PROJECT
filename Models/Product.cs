@@ -53,7 +53,7 @@ public class Product
     public void SetProductInfo(CreateProductViewModel productData)
     {
         Name = productData.Name;
-        Price = productData.Price;
+        Price = (decimal)productData.Price;
         Category = productData.Category;
         SellingTime = productData.SellingTime;
 
@@ -68,6 +68,7 @@ public class Product
     {
         // Hàm đại diện theo yêu cầu UML Pseudocode. 
         // Về bản chất EF Core sẽ lưu bằng lệnh Add() ở DBContext.
+    }
 
   
     public string ReadProduct()

@@ -113,13 +113,7 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Product entity
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasKey(p => p.ProductId);
-            entity.Property(p => p.Name).HasMaxLength(255).IsRequired();
-            entity.Property(p => p.Price).IsRequired();
-        });
+
 
         // Configure StallProduct entity
         modelBuilder.Entity<StallProduct>(entity =>
